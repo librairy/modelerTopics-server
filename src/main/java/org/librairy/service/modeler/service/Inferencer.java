@@ -1,7 +1,7 @@
 package org.librairy.service.modeler.service;
 
 import cc.mallet.pipe.Pipe;
-import cc.mallet.topics.LDALauncher;
+import cc.mallet.topics.ModelLauncher;
 import cc.mallet.topics.TopicInferencer;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
@@ -26,7 +26,7 @@ public class Inferencer {
     private final LibrairyNlpClient client;
     private final String language;
 
-    public Inferencer(LDALauncher ldaLauncher, LibrairyNlpClient client, String language, String resourceFolder) throws Exception {
+    public Inferencer(ModelLauncher ldaLauncher, LibrairyNlpClient client, String language, String resourceFolder) throws Exception {
 
         LOG.info("Initializing a new Inferer...");
         this.topicInferer               = ldaLauncher.getTopicInferencer(resourceFolder);

@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan({"org.librairy.service"})
+@ComponentScan({"org.librairy.service","cc.mallet.topics"})
 public class Application  {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);

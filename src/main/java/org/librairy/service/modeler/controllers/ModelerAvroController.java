@@ -11,7 +11,7 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 
 @Component
-public class AvroController {
+public class ModelerAvroController {
 
     @Autowired
     ModelerService service;

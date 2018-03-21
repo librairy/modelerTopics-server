@@ -1,6 +1,6 @@
 package org.librairy.service.modeler.service;
 
-import cc.mallet.topics.LDALauncher;
+import cc.mallet.topics.ModelLauncher;
 import cc.mallet.topics.LDAParameters;
 import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.Alphabet;
@@ -32,7 +32,7 @@ public class TopicsService {
     private String resourceFolder;
 
     @Autowired
-    LDALauncher ldaLauncher;
+    ModelLauncher modelLauncher;
 
     private ArrayList topics = new ArrayList();
     private Map<Integer, List<Element>> words = new HashMap<>();
@@ -40,7 +40,8 @@ public class TopicsService {
 
     @PostConstruct
     public void setup() throws Exception {
-        if (ldaLauncher.existsModel(resourceFolder)) loadModel();
+        if (modelLauncher.existsModel(resourceFolder)) loadModel();
+        else LOG.warn("No found model!");
     }
 
     @PreDestroy
@@ -49,15 +50,15 @@ public class TopicsService {
     }
 
     public void remove(){
-        ldaLauncher.removeModel(resourceFolder);
+        modelLauncher.removeModel(resourceFolder);
         topics = new ArrayList();
         words = new HashMap<>();
     }
 
     public void loadModel() throws Exception {
         LOG.info("Loading existing topic model");
-        ParallelTopicModel topicModel   = ldaLauncher.getTopicModel(resourceFolder);
-        parameters = ldaLauncher.readParameters(resourceFolder);
+        ParallelTopicModel topicModel   = modelLauncher.getTopicModel(resourceFolder);
+        parameters = modelLauncher.readParameters(resourceFolder);
 
         try{
             this.topics = new ArrayList<>();

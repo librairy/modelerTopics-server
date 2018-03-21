@@ -3,8 +3,8 @@ package org.librairy.service.modeler.controllers;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.librairy.service.modeler.Application;
 import org.librairy.service.modeler.facade.AvroClient;
-import org.librairy.service.modeler.service.MyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +14,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.io.IOException;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {AvroController.class,MyService.class})
+@SpringBootTest(classes = {Application.class})
 @WebAppConfiguration
 public class AvroTest {
 

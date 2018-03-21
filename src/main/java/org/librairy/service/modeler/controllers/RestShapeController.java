@@ -21,7 +21,7 @@ import javax.annotation.PreDestroy;
 
 @RestController
 @RequestMapping("/shape")
-@Api(tags="/shape", description="topics distribution for a given text")
+@Api(tags="/shape", description="topic vector")
 public class RestShapeController {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestShapeController.class);

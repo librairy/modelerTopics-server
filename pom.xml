@@ -214,6 +214,27 @@
 			  <artifactId>logback-core</artifactId>
 		  </dependency>
 
+		  <!-- Docker examples -->
+		  <dependency>
+			  <groupId>com.spotify</groupId>
+			  <artifactId>docker-client</artifactId>
+			  <version>8.7.1</version>
+			  <!--<classifier>shaded</classifier>-->
+			  <scope>test</scope>
+		  </dependency>
+		  <dependency>
+			  <groupId>org.apache.velocity</groupId>
+			  <artifactId>velocity</artifactId>
+			  <version>1.7</version>
+			  <scope>test</scope>
+		  </dependency>
+		  <dependency>
+			  <groupId>org.apache.velocity</groupId>
+			  <artifactId>velocity-tools</artifactId>
+			  <version>2.0</version>
+			  <scope>test</scope>
+		  </dependency>
+
 	  </dependencies>
 
 	  <build>
@@ -257,6 +278,16 @@
 			  <plugin>
 				  <groupId>org.springframework.boot</groupId>
 				  <artifactId>spring-boot-maven-plugin</artifactId>
+				  <executions>
+					  <execution>
+						  <goals>
+							  <goal>repackage</goal>
+						  </goals>
+						  <configuration>
+							  <classifier>exec</classifier>
+						  </configuration>
+					  </execution>
+				  </executions>
 			  </plugin>
 
 			  <!-- Docker Plugin -->
@@ -272,7 +303,7 @@
 						  <resource>
 							  <targetPath>/</targetPath>
 							  <directory>${project.build.directory}</directory>
-							  <include>${project.build.finalName}.jar</include>
+							  <include>${project.build.finalName}-exec.jar</include>
 						  </resource>
 						  <resource>
 							  <targetPath>/bin</targetPath>

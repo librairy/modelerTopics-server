@@ -1,6 +1,6 @@
 package org.librairy.service.modeler.service;
 
-import cc.mallet.topics.LDALauncher;
+import cc.mallet.topics.ModelLauncher;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class InferencePoolManager {
     String resourceFolder;
 
     @Autowired
-    LDALauncher ldaLauncher;
+    ModelLauncher ldaLauncher;
 
     @Autowired
     LibrairyNlpClient client;

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/inference")
-@Api(tags="/inference", description="topics distribution for a given text")
+@Api(tags="/inference", description="topic distributions")
 public class RestInferenceController {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestInferenceController.class);
@@ -41,7 +41,7 @@ public class RestInferenceController {
 
     }
 
-    @ApiOperation(value = "topics in a text", nickname = "postInference", response=Inference.class)
+    @ApiOperation(value = "topics details in a text", nickname = "postInference", response=Inference.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success", response = Inference.class),
     })
