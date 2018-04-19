@@ -31,6 +31,8 @@ public class LDAParameters implements Serializable{
 
     Integer idIndex         = 1;
 
+    String pos              = "VERB NOUN ADVERB ADJECTIVE";
+
     public LDAParameters(String corpusFile, String outputDir) {
         this.corpusFile = corpusFile;
         this.outputDir = outputDir;
@@ -132,6 +134,14 @@ public class LDAParameters implements Serializable{
         this.idIndex = idIndex;
     }
 
+    public String getPos() {
+        return pos;
+    }
+
+    public void setPos(String pos) {
+        this.pos = pos;
+    }
+
     @Override
     public String toString() {
         return "LDAParameters{" +
@@ -140,6 +150,7 @@ public class LDAParameters implements Serializable{
                 ", numTopics=" + numTopics +
                 ", numTopWords=" + numTopWords +
                 ", numIterations=" + numIterations +
+                ", pos=" + pos +
                 '}';
     }
 }
