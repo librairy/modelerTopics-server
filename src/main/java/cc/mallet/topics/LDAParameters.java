@@ -17,6 +17,8 @@ public class LDAParameters implements Serializable{
 
     Integer numIterations   = 1000;
 
+    Integer numRetries   = 100;
+
     String corpusFile;
 
     String outputDir;
@@ -142,6 +144,14 @@ public class LDAParameters implements Serializable{
         this.pos = pos;
     }
 
+    public Integer getNumRetries() {
+        return numRetries;
+    }
+
+    public void setNumRetries(Integer numRetries) {
+        this.numRetries = numRetries;
+    }
+
     @Override
     public String toString() {
         return "LDAParameters{" +
@@ -151,6 +161,7 @@ public class LDAParameters implements Serializable{
                 ", numTopWords=" + numTopWords +
                 ", numIterations=" + numIterations +
                 ", pos=" + pos +
+                ", retries=" + numRetries +
                 '}';
     }
 }
