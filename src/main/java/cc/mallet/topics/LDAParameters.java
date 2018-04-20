@@ -17,7 +17,7 @@ public class LDAParameters implements Serializable{
 
     Integer numIterations   = 1000;
 
-    Integer numRetries   = 100;
+    Integer numRetries      = 10;
 
     String corpusFile;
 
