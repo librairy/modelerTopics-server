@@ -79,7 +79,7 @@ public class TopicsService {
 
             LOG.info("Model load!");
         }catch (Exception e){
-            LOG.warn("Error loading model: " + e.getMessage());
+            LOG.warn("Error loading model: " + e.getMessage(), e);
         }
     }
 
