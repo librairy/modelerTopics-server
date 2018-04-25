@@ -16,9 +16,9 @@ import java.io.IOException;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})
 @WebAppConfiguration
-public class AvroTest {
+public class AvroIntTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AvroTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AvroIntTest.class);
 
     @Test
     public void inferenceTest() throws InterruptedException, IOException {

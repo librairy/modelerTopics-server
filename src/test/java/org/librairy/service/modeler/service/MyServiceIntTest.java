@@ -20,9 +20,9 @@ import java.util.List;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
-public class MyServiceTest {
+public class MyServiceIntTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MyServiceTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MyServiceIntTest.class);
 
     @Autowired
     ModelerService service;

@@ -1,10 +1,7 @@
 package org.librairy.service.modeler.service;
 
 import org.apache.avro.AvroRemoteException;
-import org.librairy.service.modeler.facade.model.Dimension;
-import org.librairy.service.modeler.facade.model.Element;
-import org.librairy.service.modeler.facade.model.ModelerService;
-import org.librairy.service.modeler.facade.model.Relevance;
+import org.librairy.service.modeler.facade.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +46,11 @@ public class ModelerServiceImpl implements ModelerService {
     @Override
     public List<Element> elements(int topicId, int maxWords) throws AvroRemoteException {
         return topicsService.getWords(topicId,maxWords);
+    }
+
+    @Override
+    public Model model() throws AvroRemoteException {
+        return topicsService.getModel();
     }
 
     @Override

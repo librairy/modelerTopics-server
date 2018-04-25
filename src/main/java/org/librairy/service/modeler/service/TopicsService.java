@@ -1,13 +1,14 @@
 package org.librairy.service.modeler.service;
 
 import cc.mallet.topics.ModelLauncher;
-import cc.mallet.topics.LDAParameters;
+import cc.mallet.topics.ModelParams;
 import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
 import org.apache.avro.AvroRemoteException;
 import org.librairy.service.modeler.facade.model.Dimension;
 import org.librairy.service.modeler.facade.model.Element;
+import org.librairy.service.modeler.facade.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +35,10 @@ public class TopicsService {
     @Autowired
     ModelLauncher modelLauncher;
 
+    private Model model;
     private ArrayList topics = new ArrayList();
     private Map<Integer, List<Element>> words = new HashMap<>();
-    private LDAParameters parameters;
+    private ModelParams parameters;
 
     @PostConstruct
     public void setup() throws Exception {
@@ -53,13 +55,14 @@ public class TopicsService {
         modelLauncher.removeModel(resourceFolder);
         topics = new ArrayList();
         words = new HashMap<>();
+        model = new Model();
     }
 
     public void loadModel() throws Exception {
         LOG.info("Loading existing topic model");
         ParallelTopicModel topicModel   = modelLauncher.getTopicModel(resourceFolder);
         parameters = modelLauncher.readParameters(resourceFolder);
-
+        model = modelLauncher.getDetails(resourceFolder);
         try{
             this.topics = new ArrayList<>();
             this.words  = getTopWords(topicModel,50);
@@ -125,13 +128,18 @@ public class TopicsService {
         return topics;
     }
 
+    public Model getModel() throws AvroRemoteException {
+        return model;
+    }
+
+
     public List<Element> getWords(int topicId, int maxWords) throws AvroRemoteException {
         if (!words.containsKey(topicId)) return Collections.emptyList();
         return words.get(topicId).stream().limit(maxWords).collect(Collectors.toList());
 
     }
 
-    public LDAParameters getParameters() {
+    public ModelParams getParameters() {
         return parameters;
     }
 }

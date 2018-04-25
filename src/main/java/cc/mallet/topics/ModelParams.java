@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class LDAParameters implements Serializable{
+public class ModelParams implements Serializable{
 
     Double alpha            = 0.1;
 
@@ -35,9 +35,12 @@ public class LDAParameters implements Serializable{
 
     String pos              = "VERB NOUN ADVERB ADJECTIVE";
 
-    public LDAParameters(String corpusFile, String outputDir) {
+    public ModelParams(String corpusFile, String outputDir) {
         this.corpusFile = corpusFile;
         this.outputDir = outputDir;
+    }
+
+    public ModelParams() {
     }
 
     public String getLanguage() {
@@ -154,7 +157,7 @@ public class LDAParameters implements Serializable{
 
     @Override
     public String toString() {
-        return "LDAParameters{" +
+        return "ModelParams{" +
                 "alpha=" + alpha +
                 ", beta=" + beta +
                 ", numTopics=" + numTopics +
