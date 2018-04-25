@@ -9,13 +9,14 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.librairy.service.modeler.facade.model.Model;
 import org.librairy.service.modeler.service.StatsService;
 import org.librairy.service.modeler.service.TimeService;
+import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +31,9 @@ public class ModelLauncher {
     DatumWriter<Model> modelDatumWriter = new SpecificDatumWriter<Model>(Model.class);
 
     DatumReader<Model> modelDatumReader = new SpecificDatumReader<Model>(Model.class);
+
+    @Autowired
+    TopicsService topicsService;
 
     public boolean existsModel(String baseDir){
         return Paths.get(baseDir,"model-inferencer.bin").toFile().exists() && Paths.get(baseDir,"model-parallel.bin").toFile().exists();
@@ -111,6 +115,13 @@ public class ModelLauncher {
         LOG.info("saving topics statistics..");
         saveParameters(baseDir, parameters);
         LOG.info("model saved successfully");
+
+        try {
+            topicsService.loadModel();
+        } catch (Exception e) {
+            LOG.error("Error loading the new model",e);
+        }
+
     }
 
     public void saveParameters(String baseDir, ModelParams parameters) throws IOException {

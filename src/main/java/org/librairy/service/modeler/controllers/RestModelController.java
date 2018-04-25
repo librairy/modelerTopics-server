@@ -50,7 +50,7 @@ public class RestModelController {
     public Model model()  {
         try {
             org.librairy.service.modeler.facade.model.Model model = service.model();
-            return new Model(model);
+            return (model == null)?  new Model() : new Model(model);
         } catch (AvroRemoteException e) {
             throw new RuntimeException(e);
         }
