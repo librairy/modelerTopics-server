@@ -94,6 +94,8 @@ public class ModelLauncher {
         stats.put("stopwords", model.stoplist.toString());
         stats.put("topic-coherence", StatsService.from(diagnostics.getCoherence().scores));
         stats.put("topic-distance", StatsService.from(diagnostics.getDistanceFromCorpus().scores));
+        stats.put("alpha-sum", String.valueOf(model.alphaSum));
+        stats.put("beta-sum", String.valueOf(model.betaSum));
 
         Model modelDetails = Model.newBuilder().setAlgorithm(algorithm).setDate(TimeService.now()).setParams(params).setStats(stats).build();
         DataFileWriter<Model> dataFileWriter = new DataFileWriter<Model>(modelDatumWriter);

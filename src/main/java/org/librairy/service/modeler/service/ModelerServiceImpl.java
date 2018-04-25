@@ -76,9 +76,7 @@ public class ModelerServiceImpl implements ModelerService {
     @Override
     public List<Double> shape(String s) throws AvroRemoteException {
         try {
-
-            String language    = topicsService.getParameters().getLanguage();
-            List<Double> shape = inferencePoolManager.get(Thread.currentThread(), language).inference(s);
+            List<Double> shape = inferencePoolManager.get(Thread.currentThread()).inference(s);
             return shape;
         } catch (Exception e) {
             throw new AvroRemoteException("Error loading topic model",e);

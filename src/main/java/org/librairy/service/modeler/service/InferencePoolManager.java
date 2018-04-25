@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -26,29 +29,64 @@ public class InferencePoolManager {
     @Value("#{environment['RESOURCE_FOLDER']?:'${resource.folder}'}")
     String resourceFolder;
 
+    @Value("#{environment['SERVER_THREADS']?:${server.tomcat.max-threads}}")
+    Integer maxThreads;
+
+    @Autowired
+    TopicsService topicsService;
+
     @Autowired
     ModelLauncher ldaLauncher;
 
     @Autowired
     LibrairyNlpClient client;
 
-    Map<String,Inferencer> inferencePool;
+    Map<Long,Inferencer> inferencePool;
+
+    private String language;
 
     @PostConstruct
-    public void setup(){
-        inferencePool     = new ConcurrentHashMap<>();
+    public void setup() throws InterruptedException {
+
+        inferencePool   = new ConcurrentHashMap<>();
+        language = topicsService.getParameters().getLanguage();
+
+        ExecutorService executors = Executors.newWorkStealingPool();
+
+        for(int i=0;i<maxThreads;i++){
+            final Long id = Long.valueOf(i);
+            executors.submit(() -> {
+                try {
+                    initializeInferencer(id);
+                } catch (Exception e) {
+                    LOG.warn("error initializing inferencer",e);
+                }
+            });
+
+        }
+        executors.shutdown();
+        executors.awaitTermination(1, TimeUnit.HOURS);
+
     }
 
-    public Inferencer get(Thread thread, String language) throws Exception {
+    public Inferencer get(Thread thread) throws Exception {
+        Long key = getKey(thread.getId());
+        initializeInferencer(key);
+        return inferencePool.get(key);
 
-        String id = "thread"+thread.getId();
+    }
+
+    private void initializeInferencer(Long id) throws Exception {
         if (!inferencePool.containsKey(id)){
             LOG.info("Initializing Topic Inferencer for thread: " + id);
             Inferencer inferencer = new Inferencer(ldaLauncher,client,language,resourceFolder);
             inferencePool.put(id,inferencer);
         }
-        return inferencePool.get(id);
+    }
 
+
+    private Long getKey(Long id){
+        return id % maxThreads;
     }
 
     public void update(){

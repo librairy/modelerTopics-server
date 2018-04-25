@@ -28,7 +28,6 @@ public class Inferencer {
 
     public Inferencer(ModelLauncher ldaLauncher, LibrairyNlpClient client, String language, String resourceFolder) throws Exception {
 
-        LOG.info("Initializing a new Inferer...");
         this.topicInferer               = ldaLauncher.getTopicInferencer(resourceFolder);
         this.client                     = client;
         this.language                   = language;
