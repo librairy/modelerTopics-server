@@ -99,7 +99,7 @@ public class ModelLauncher {
             Map<String,String> stats = new HashMap<>();
             stats.put("loglikelihood", String.valueOf(model.modelLogLikelihood()));
             stats.put("vocabulary", String.valueOf(model.alphabet.size()));
-            stats.put("doc-lengths", StatsService.from(model.docLengthCounts));
+            if (model.docLengthCounts != null) stats.put("doc-lengths", StatsService.from(model.docLengthCounts));
             stats.put("num-topics", String.valueOf(model.getNumTopics()));
             stats.put("stopwords", model.stoplist.toString());
             stats.put("topic-coherence", StatsService.from(diagnostics.getCoherence().scores));
@@ -136,7 +136,7 @@ public class ModelLauncher {
             topicsService.loadModel();
 
         } catch (Exception var6) {
-            LOG.warn("Couldn\'t save model: " + var6.getMessage());
+            LOG.warn("Couldn\'t save model", var6);
         }
 
 
