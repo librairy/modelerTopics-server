@@ -19,7 +19,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -36,7 +35,7 @@ public class TopicsService {
     ModelLauncher modelLauncher;
 
     private Model model;
-    private ArrayList topics = new ArrayList();
+    private List topics = new ArrayList();
     private Map<Integer, List<Element>> words = new HashMap<>();
     private ModelParams parameters;
 
@@ -60,30 +59,11 @@ public class TopicsService {
 
     public void loadModel() throws Exception {
         LOG.info("Loading existing topic model");
-        ParallelTopicModel topicModel   = modelLauncher.getTopicModel(resourceFolder);
-        parameters = modelLauncher.readParameters(resourceFolder);
-        model = modelLauncher.getDetails(resourceFolder);
-        try{
-            this.topics = new ArrayList<>();
-            this.words  = getTopWords(topicModel,50);
-
-
-            IntStream.range(0,topicModel.getNumTopics()).forEach(id -> {
-
-                Dimension topic = new Dimension();
-
-                topic.setId(id);
-                topic.setName((String)topicModel.getTopicAlphabet().lookupObject(id));
-
-                topic.setDescription(words.get(id).stream().limit(10).map(w->w.getValue()).collect(Collectors.joining(",")));
-                topics.add(topic);
-
-            });
-
-            LOG.info("Model load!");
-        }catch (Exception e){
-            LOG.warn("Error loading model: " + e.getMessage(), e);
-        }
+        parameters  = modelLauncher.readParameters(resourceFolder);
+        model       = modelLauncher.getDetails(resourceFolder);
+        topics      = modelLauncher.readTopics(resourceFolder);
+        words       = modelLauncher.readTopicWords(resourceFolder);
+        LOG.info("Model load!");
     }
 
     public Map<Integer,List<Element>> getTopWords(ParallelTopicModel topicModel, int numWords) throws Exception {

@@ -44,15 +44,19 @@ public class InferencePoolManager {
     Map<Long,Inferencer> inferencePool;
 
     @PostConstruct
-    public void setup() throws InterruptedException {
+    public void setup() throws Exception {
 
         inferencePool   = new ConcurrentHashMap<>();
 
         if (topicsService.getParameters() != null){
-            
+
+            LOG.info("Deserializing topic inferencer ..");
+            initializeInferencer(0l);
+
+            LOG.info("Initializing "+maxThreads+" parallel inferencer ..");
             ExecutorService executors = Executors.newWorkStealingPool();
 
-            for(int i=0;i<maxThreads;i++){
+            for(int i=1;i<maxThreads;i++){
                 final Long id = Long.valueOf(i);
                 executors.submit(() -> {
                     try {
@@ -65,6 +69,7 @@ public class InferencePoolManager {
             }
             executors.shutdown();
             executors.awaitTermination(1, TimeUnit.HOURS);
+            LOG.info("done!");
         }
 
 
@@ -80,8 +85,7 @@ public class InferencePoolManager {
     private void initializeInferencer(Long id) throws Exception {
         if (!inferencePool.containsKey(id) && topicsService.getParameters() != null){
             String language = topicsService.getParameters().getLanguage();
-            LOG.info("Initializing Topic Inferencer for thread: " + id);
-            Inferencer inferencer = new Inferencer(ldaLauncher,client,language,resourceFolder);
+            Inferencer inferencer = inferencePool.containsKey(0l)? new Inferencer(inferencePool.get(0l).getTopicInferer(),client,language) : new Inferencer(ldaLauncher,client,language,resourceFolder);
             inferencePool.put(id,inferencer);
         }
     }

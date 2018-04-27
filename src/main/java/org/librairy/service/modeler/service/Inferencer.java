@@ -33,6 +33,14 @@ public class Inferencer {
         this.language                   = language;
     }
 
+    public Inferencer(TopicInferencer inferencer, LibrairyNlpClient client, String language) throws Exception {
+
+        this.topicInferer               = inferencer.clone();
+        this.client                     = client;
+        this.language                   = language;
+    }
+
+
 
     public List<Double> inference(String s) throws Exception {
 
@@ -42,7 +50,7 @@ public class Inferencer {
         String name = "";
         String source = "";
         String target = "";
-        Integer numIterations = 100;
+        Integer numIterations = 1000;
 
         Instance rawInstance = new Instance(data,target,name,source);
         Pipe pipe = new PipeBuilder().build(client, language);
@@ -57,5 +65,9 @@ public class Inferencer {
         LOG.debug("Topic Distribution of: " + s.substring(0,10)+ ".. " + Arrays.toString(topicDistribution));
         return Doubles.asList(topicDistribution);
 
+    }
+
+    public TopicInferencer getTopicInferer() {
+        return topicInferer;
     }
 }
