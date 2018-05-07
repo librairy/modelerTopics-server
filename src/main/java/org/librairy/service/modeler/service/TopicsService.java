@@ -115,7 +115,7 @@ public class TopicsService {
 
     public List<Element> getWords(int topicId, int maxWords) throws AvroRemoteException {
         if (!words.containsKey(topicId)) return Collections.emptyList();
-        return words.get(topicId).stream().limit(maxWords).collect(Collectors.toList());
+        return words.get(topicId).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).limit(maxWords).collect(Collectors.toList());
 
     }
 
