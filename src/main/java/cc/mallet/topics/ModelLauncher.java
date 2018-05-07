@@ -121,7 +121,7 @@ public class ModelLauncher {
             saveToFile(topicWords, Paths.get(baseDir, "model-topic-words.csv.gz"));
 
             // save topics
-            List<String> topics = IntStream.range(0, topWords.size()).parallel().mapToObj(i -> i + ";;" + model.getTopicAlphabet().lookupObject(i) + ";;" + topWords.get(i).stream().limit(10).map(w -> w.getValue()).collect(Collectors.joining(","))+"\n").collect(Collectors.toList());
+            List<String> topics = IntStream.range(0, topWords.size()).parallel().mapToObj(i -> i + ";;" + model.getTopicAlphabet().lookupObject(i) + ";;" + topWords.get(i).stream().sorted( (a,b) -> -a.getScore().compareTo(b.getScore())).limit(10).map(w -> w.getValue()).collect(Collectors.joining(","))+"\n").collect(Collectors.toList());
             saveToFile(topics, Paths.get(baseDir, "model-topics.csv.gz"));
 
             LOG.info("saving model inferencer..");

@@ -1,6 +1,8 @@
 package cc.mallet.topics;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -34,6 +36,8 @@ public class ModelParams implements Serializable{
     Integer idIndex         = 1;
 
     String pos              = "VERB NOUN ADVERB ADJECTIVE";
+
+    List<String> stopwords  = new ArrayList<>();
 
     public ModelParams(String corpusFile, String outputDir) {
         this.corpusFile = corpusFile;
@@ -155,6 +159,14 @@ public class ModelParams implements Serializable{
         this.numRetries = numRetries;
     }
 
+    public List<String> getStopwords() {
+        return stopwords;
+    }
+
+    public void setStopwords(List<String> stopwords) {
+        this.stopwords = stopwords;
+    }
+
     @Override
     public String toString() {
         return "ModelParams{" +
@@ -163,8 +175,17 @@ public class ModelParams implements Serializable{
                 ", numTopics=" + numTopics +
                 ", numTopWords=" + numTopWords +
                 ", numIterations=" + numIterations +
-                ", pos=" + pos +
-                ", retries=" + numRetries +
+                ", numRetries=" + numRetries +
+                ", corpusFile='" + corpusFile + '\'' +
+                ", outputDir='" + outputDir + '\'' +
+                ", language='" + language + '\'' +
+                ", regEx='" + regEx + '\'' +
+                ", textIndex=" + textIndex +
+                ", labelIndex=" + labelIndex +
+                ", idIndex=" + idIndex +
+                ", pos='" + pos + '\'' +
+                ", stopwords=" + stopwords +
                 '}';
     }
+
 }
