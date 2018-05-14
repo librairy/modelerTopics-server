@@ -33,8 +33,7 @@ public class Inferencer {
         this.language                   = language;
     }
 
-    public Inferencer(TopicInferencer inferencer, LibrairyNlpClient client, String language) throws Exception {
-
+    public Inferencer(TopicInferencer inferencer, LibrairyNlpClient client, String language) {
         this.topicInferer               = inferencer.clone();
         this.client                     = client;
         this.language                   = language;

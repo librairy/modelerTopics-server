@@ -1,6 +1,9 @@
 package org.librairy.service.modeler.service;
 
 import cc.mallet.topics.ModelLauncher;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,53 +44,38 @@ public class InferencePoolManager {
     @Autowired
     LibrairyNlpClient client;
 
-    Map<Long,Inferencer> inferencePool;
+
+    LoadingCache<Long, Inferencer> inferenceCache;
+
+    Inferencer inferencer;
+
 
     @PostConstruct
     public void setup() throws Exception {
 
-        inferencePool   = new ConcurrentHashMap<>();
-
         if (topicsService.getParameters() != null){
-
             LOG.info("Deserializing topic inferencer ..");
-            initializeInferencer(0l);
-
-            LOG.info("Initializing "+maxThreads+" parallel inferencer ..");
-            ExecutorService executors = Executors.newWorkStealingPool();
-
-            for(int i=1;i<maxThreads;i++){
-                final Long id = Long.valueOf(i);
-                executors.submit(() -> {
-                    try {
-                        initializeInferencer(id);
-                    } catch (Exception e) {
-                        LOG.warn("error initializing inferencer",e);
-                    }
-                });
-
-            }
-            executors.shutdown();
-            executors.awaitTermination(1, TimeUnit.HOURS);
+            String language = topicsService.getParameters().getLanguage();
+            this.inferencer = new Inferencer(ldaLauncher,client,language,resourceFolder);
             LOG.info("done!");
         }
 
+        inferenceCache = CacheBuilder.newBuilder()
+                .maximumSize(maxThreads)
+                .build(
+                        new CacheLoader<Long, Inferencer>() {
+                            public Inferencer load(Long key) {
+                                LOG.info("Inferencer cloned for thread: " + key + " /  Total:" + (inferenceCache.size()+1));
+                                String language = topicsService.getParameters().getLanguage();
+                                return new Inferencer(inferencer.getTopicInferer(), client, language);
+                            }
+                });
 
     }
 
     public Inferencer get(Thread thread) throws Exception {
         Long key = getKey(thread.getId());
-        initializeInferencer(key);
-        return inferencePool.get(key);
-
-    }
-
-    private void initializeInferencer(Long id) throws Exception {
-        if (!inferencePool.containsKey(id) && topicsService.getParameters() != null){
-            String language = topicsService.getParameters().getLanguage();
-            Inferencer inferencer = inferencePool.containsKey(0l)? new Inferencer(inferencePool.get(0l).getTopicInferer(),client,language) : new Inferencer(ldaLauncher,client,language,resourceFolder);
-            inferencePool.put(id,inferencer);
-        }
+        return this.inferenceCache.get(key);
     }
 
 
@@ -95,7 +83,4 @@ public class InferencePoolManager {
         return id % maxThreads;
     }
 
-    public void update(){
-        this.inferencePool.clear();
-    }
 }
