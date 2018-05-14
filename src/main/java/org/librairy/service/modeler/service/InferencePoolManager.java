@@ -65,7 +65,7 @@ public class InferencePoolManager {
                 .build(
                         new CacheLoader<Long, Inferencer>() {
                             public Inferencer load(Long key) {
-                                LOG.info("Inferencer cloned for thread: " + key + " /  Total:" + (inferenceCache.size()+1));
+                                LOG.info("Inferencer instantiated for thread: " + key + " /  Total:" + (inferenceCache.size()+1));
                                 String language = topicsService.getParameters().getLanguage();
                                 return new Inferencer(inferencer.getTopicInferer(), client, language);
                             }

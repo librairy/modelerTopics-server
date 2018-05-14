@@ -1,5 +1,6 @@
 package cc.mallet.topics;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
@@ -42,6 +43,8 @@ public class ModelLauncher {
     DatumWriter<Model> modelDatumWriter = new SpecificDatumWriter<Model>(Model.class);
 
     DatumReader<Model> modelDatumReader = new SpecificDatumReader<Model>(Model.class);
+
+    ObjectMapper jsonMapper = new ObjectMapper();
 
     @Autowired
     TopicsService topicsService;
@@ -209,20 +212,11 @@ public class ModelLauncher {
     }
 
     public void saveParameters(String baseDir, ModelParams parameters) throws IOException {
-        FileOutputStream fout = new FileOutputStream(Paths.get(baseDir,"model-parameters.bin").toFile());
-        ObjectOutputStream oos = new ObjectOutputStream(fout);
-        oos.writeObject(parameters);
-        oos.close();
-        fout.close();
+        jsonMapper.writeValue(Paths.get(baseDir,"model-parameters.bin").toFile(), parameters);
     }
 
     public ModelParams readParameters(String baseDir) throws IOException, ClassNotFoundException {
-        FileInputStream fout = new FileInputStream(Paths.get(baseDir,"model-parameters.bin").toFile());
-        ObjectInputStream oos = new ObjectInputStream(fout);
-        ModelParams parameters = (ModelParams) oos.readObject();
-        oos.close();
-        fout.close();
-        return parameters;
+        return jsonMapper.readValue(Paths.get(baseDir,"model-parameters.bin").toFile(), ModelParams.class);
     }
 
 }

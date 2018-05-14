@@ -58,12 +58,12 @@ public class TopicsService {
     }
 
     public void loadModel() throws Exception {
-        LOG.info("Loading existing topic model");
+        LOG.info("Reading existing topic model");
         parameters  = modelLauncher.readParameters(resourceFolder);
         model       = modelLauncher.getDetails(resourceFolder);
         topics      = modelLauncher.readTopics(resourceFolder);
         words       = modelLauncher.readTopicWords(resourceFolder);
-        LOG.info("Model load!");
+        LOG.info("Model ready!");
     }
 
     public Map<Integer,List<Element>> getTopWords(ParallelTopicModel topicModel, int numWords) throws Exception {
