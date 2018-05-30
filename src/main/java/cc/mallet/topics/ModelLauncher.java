@@ -97,7 +97,7 @@ public class ModelLauncher {
             params.put("top-words",String.valueOf(parameters.getNumTopWords()));
 
             LOG.info("saving model stats..");
-            TopicModelDiagnostics diagnostics = new TopicModelDiagnostics(model, numTopWords);
+            TopicModelDiagnostics diagnostics = new TopicModelDiagnostics(model, numTopWords<0?50:numTopWords);
 
             Map<String,String> stats = new HashMap<>();
             stats.put("loglikelihood", String.valueOf(model.modelLogLikelihood()));
@@ -192,7 +192,7 @@ public class ModelLauncher {
 
         ConcurrentHashMap<Integer,List<Element>> topicWords = new ConcurrentHashMap();
 
-        readFromFile(Paths.get(baseDir, "model-topic-words.csv.gz")).parallelStream().forEach( line -> {
+        readFromFile(Paths.get(baseDir, "model-topic-words.csv.gz")).stream().forEach( line -> {
             String[] values = line.split(";;");
 
             Integer id = Integer.valueOf(values[0]);
@@ -207,6 +207,10 @@ public class ModelLauncher {
             topicWords.get(id).add(word);
 
         });
+
+        // Sort topic words
+        LOG.info("sorting topic words..");
+        topicWords.keySet().parallelStream().forEach(key -> topicWords.put(key, topicWords.get(key).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList())));
 
         return topicWords;
     }

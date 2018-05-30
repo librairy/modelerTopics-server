@@ -60,9 +60,11 @@ public class RestDimensionsController {
     @RequestMapping(value = "/{id:.+}", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<ElementList> get(
             @ApiParam(value = "id", required = true) @PathVariable Integer id,
-            @RequestParam Integer maxWords)  {
+            @RequestParam(defaultValue = "25") Integer maxWords,
+            @RequestParam(defaultValue = "0") Integer offset
+            )  {
         try {
-            return new ResponseEntity(new ElementList(service.elements(id,maxWords).stream().map(w -> new Element(w)).collect(Collectors.toList())), HttpStatus.OK);
+            return new ResponseEntity(new ElementList(service.elements(id,maxWords,offset).stream().map(w -> new Element(w)).collect(Collectors.toList())), HttpStatus.OK);
         } catch (AvroRemoteException e) {
             return new ResponseEntity("internal service seems down",HttpStatus.FAILED_DEPENDENCY);
         } catch (Exception e) {

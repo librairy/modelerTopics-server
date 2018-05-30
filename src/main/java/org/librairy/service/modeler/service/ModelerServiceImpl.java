@@ -44,8 +44,8 @@ public class ModelerServiceImpl implements ModelerService {
     }
 
     @Override
-    public List<Element> elements(int topicId, int maxWords) throws AvroRemoteException {
-        return topicsService.getWords(topicId,maxWords);
+    public List<Element> elements(int topicId, int maxWords, int offset) throws AvroRemoteException {
+        return topicsService.getWords(topicId,maxWords,offset);
     }
 
     @Override

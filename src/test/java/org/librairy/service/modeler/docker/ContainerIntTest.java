@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,10 +23,10 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class ContainerTest {
+public class ContainerIntTest {
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(ContainerTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ContainerIntTest.class);
 
     @Test
     public void createImage() throws DockerCertificateException, InterruptedException, DockerException, IOException {

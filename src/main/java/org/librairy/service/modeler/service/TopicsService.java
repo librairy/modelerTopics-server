@@ -88,7 +88,7 @@ public class TopicsService {
 
             // How many words should we report? Some topics may have fewer than
             //  the default number of words with non-zero weight.
-            int limit = numWords;
+            int limit = numWords<0? sortedWords.size() : numWords;
             if (sortedWords.size() < numWords) { limit = sortedWords.size(); }
 
             List<Element> words = new ArrayList<>();
@@ -113,9 +113,10 @@ public class TopicsService {
     }
 
 
-    public List<Element> getWords(int topicId, int maxWords) throws AvroRemoteException {
+    public List<Element> getWords(int topicId, int maxWords, int offset) throws AvroRemoteException {
         if (!words.containsKey(topicId)) return Collections.emptyList();
-        return words.get(topicId).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).limit(maxWords).collect(Collectors.toList());
+        //return words.get(topicId).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).skip(offset).limit(maxWords).collect(Collectors.toList());
+        return words.get(topicId).stream().skip(offset).limit(maxWords).collect(Collectors.toList());
 
     }
 

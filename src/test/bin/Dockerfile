@@ -1,7 +1,7 @@
 FROM librairy/modeler-topics-service:latest
 ADD model /bin
-ENV SWAGGER_TITLE="CORDIS Topic Model - Infrastructure as Category"
-ENV SWAGGER_DESCRIPTION="Topic Model created from Community Research and Development Information Service projects between 1984-2018"
+ENV SWAGGER_TITLE="LightPollution Topic Model"
+ENV SWAGGER_DESCRIPTION="Topic Model created from papers about lightpollution"
 ENV SWAGGER_CONTACT_NAME="librAIry"
 ENV SWAGGER_CONTACT_EMAIL="cbadenes@fi.upm.es"
 ENV SWAGGER_CONTACT_URL="http://librairy.linkeddata.es"
