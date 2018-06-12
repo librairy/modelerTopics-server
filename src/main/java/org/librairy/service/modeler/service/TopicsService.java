@@ -91,6 +91,8 @@ public class TopicsService {
             int limit = numWords<0? sortedWords.size() : numWords;
             if (sortedWords.size() < numWords) { limit = sortedWords.size(); }
 
+            LOG.info("Topic " + topic + " with " + limit + " words");
+
             List<Element> words = new ArrayList<>();
 
             Iterator<IDSorter> iterator = sortedWords.iterator();

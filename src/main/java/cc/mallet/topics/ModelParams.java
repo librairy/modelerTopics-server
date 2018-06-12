@@ -37,6 +37,8 @@ public class ModelParams implements Serializable{
 
     String pos              = "VERB NOUN ADVERB ADJECTIVE";
 
+    Boolean entities        = false;
+
     List<String> stopwords  = new ArrayList<>();
 
     public ModelParams(String corpusFile, String outputDir) {
@@ -167,6 +169,14 @@ public class ModelParams implements Serializable{
         this.stopwords = stopwords;
     }
 
+    public Boolean getEntities() {
+        return entities;
+    }
+
+    public void setEntities(Boolean entities) {
+        this.entities = entities;
+    }
+
     @Override
     public String toString() {
         return "ModelParams{" +
@@ -184,8 +194,8 @@ public class ModelParams implements Serializable{
                 ", labelIndex=" + labelIndex +
                 ", idIndex=" + idIndex +
                 ", pos='" + pos + '\'' +
+                ", entities=" + entities +
                 ", stopwords=" + stopwords +
                 '}';
     }
-
 }

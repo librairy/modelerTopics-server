@@ -8,14 +8,14 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.apache.avro.AvroRemoteException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.librairy.service.nlp.facade.AvroClient;
 import org.librairy.service.nlp.facade.model.Form;
+import org.librairy.service.nlp.facade.model.Group;
 import org.librairy.service.nlp.facade.model.PoS;
-import org.librairy.service.nlp.facade.model.Token;
-import org.librairy.service.nlp.facade.rest.model.ProcessRequest;
+import org.librairy.service.nlp.facade.rest.model.GroupsRequest;
+import org.librairy.service.nlp.facade.rest.model.TokensRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -115,32 +113,33 @@ public class LibrairyNlpClient {
     }
 
 
-    public String lemmatize(String text, String language, List<PoS> poSList){
+    public String lemmatize(String text, String language, List<PoS> poSList, Boolean entities){
         String key = "Thread-"+ Thread.currentThread().getId()+"-lang:"+language;
-        if (nlpEndpoint.startsWith("http")) return lemmatizeByHttp(text,language,poSList, key);
-        else return lemmatizeByAVRO(text,language,poSList, key);
+        if (nlpEndpoint.startsWith("http")) return lemmatizeByHttp(text,language,poSList, key, entities);
+        else return lemmatizeByAVRO(text,language,poSList, key, entities);
     }
 
 
-    private String lemmatizeByAVRO(String text, String language, List<PoS> poSList, String key){
+    private String lemmatizeByAVRO(String text, String language, List<PoS> poSList, String key, Boolean entities){
         try {
             AvroClient client = clients.get(key);
-            return client.process(text,poSList, Form.LEMMA);
+            return client.tokens(text,poSList, Form.LEMMA, entities);
         } catch (Exception e) {
             LOG.error("Error retrieving lemmas from nlp service: " + nlpEndpoint.replace("%%", language), e);
         }
         return "";
     }
 
-    private String lemmatizeByHttp(String text, String language, List<PoS> poSList, String key){
+    private String lemmatizeByHttp(String text, String language, List<PoS> poSList, String key, Boolean multigrams){
         String nlpServiceEndpoint = nlpEndpoint.replace("%%", language);
 
         try {
-            ProcessRequest request = new ProcessRequest();
+            TokensRequest request = new TokensRequest();
             request.setFilter(poSList);
             request.setForm(Form.LEMMA);
             request.setText(text);
-            HttpResponse<JsonNode> response = Unirest.post(nlpServiceEndpoint + "/process").
+            request.setMultigrams(multigrams);
+            HttpResponse<JsonNode> response = Unirest.post(nlpServiceEndpoint + "/tokens").
                     body(request).
                     asJson();
             if (response.getStatus() == 200) {
@@ -156,39 +155,40 @@ public class LibrairyNlpClient {
         return "";
     }
 
-    public List<Token> bow(String text, String language, List<PoS> poSList){
+    public List<Group> bow(String text, String language, List<PoS> poSList, Boolean entities){
         String key = "Thread-"+ Thread.currentThread().getId()+"-lang:"+language;
-        if (nlpEndpoint.startsWith("http")) return bowByHttp(text,language,poSList, key);
-        else return bowByAVRO(text,language,poSList, key);
+        if (nlpEndpoint.startsWith("http")) return bowByHttp(text,language,poSList, key, entities);
+        else return bowByAVRO(text,language,poSList, key, entities);
     }
 
 
-    private List<Token> bowByAVRO(String text, String language, List<PoS> poSList, String key){
+    private List<Group> bowByAVRO(String text, String language, List<PoS> poSList, String key, Boolean multigrams){
         try {
             AvroClient client = clients.get(key);
-            return client.group(text,poSList, Form.LEMMA);
+            return client.groups(text,poSList, Form.LEMMA, multigrams, false);
         } catch (Exception e) {
             LOG.error("Error retrieving bow from nlp service: " + nlpEndpoint.replace("%%", language), e);
         }
         return Collections.emptyList();
     }
 
-    private List<Token> bowByHttp(String text, String language, List<PoS> poSList, String key){
+    private List<Group> bowByHttp(String text, String language, List<PoS> poSList, String key, Boolean multigrams){
         String nlpServiceEndpoint = nlpEndpoint.replace("%%", language);
 
-        List<Token> tokens = new ArrayList<>();
+        List<Group> tokens = new ArrayList<>();
         try {
-            ProcessRequest request = new ProcessRequest();
+            GroupsRequest request = new GroupsRequest();
             request.setFilter(poSList);
             request.setText(text);
-            HttpResponse<JsonNode> response = Unirest.post(nlpServiceEndpoint + "/group").
+            request.setMultigrams(multigrams);
+            HttpResponse<JsonNode> response = Unirest.post(nlpServiceEndpoint + "/groups").
                     body(request).
                     asJson();
             if (response.getStatus() == 200){
-                JSONArray tokenList = response.getBody().getObject().getJSONArray("tokens");
+                JSONArray tokenList = response.getBody().getObject().getJSONArray("groups");
                 for(int i=0;i<tokenList.length();i++){
                     JSONObject json = tokenList.getJSONObject(i);
-                    Token token = Token.newBuilder().setTarget(json.getString("target")).setLemma(json.getString("lemma")).setFreq(json.getInt("freq")).setPos(PoS.valueOf(json.getString("pos").toUpperCase())).build();
+                    Group token = Group.newBuilder().setToken(json.getString("token")).setFreq(json.getInt("freq")).setPos(PoS.valueOf(json.getString("pos").toUpperCase())).build();
                     tokens.add(token);
                 }
 

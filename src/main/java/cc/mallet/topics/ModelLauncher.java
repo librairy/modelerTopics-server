@@ -212,6 +212,8 @@ public class ModelLauncher {
         LOG.info("sorting topic words..");
         topicWords.keySet().parallelStream().forEach(key -> topicWords.put(key, topicWords.get(key).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList())));
 
+        topicWords.entrySet().forEach(entry -> LOG.info("Topic " + entry.getKey() + " : " + entry.getValue().size() + " words"));
+
         return topicWords;
     }
 

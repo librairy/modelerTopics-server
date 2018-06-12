@@ -4,7 +4,7 @@
  
   <groupId>org.librairy</groupId>
   <artifactId>modeler-topics-service</artifactId>
-  <version>0.1</version>
+  <version>1.0</version>
   <packaging>jar</packaging>
   <name>modeler-topics-service</name>
   
@@ -39,7 +39,7 @@
 	  <mail.version>1.6.1</mail.version>
 	  <mallet.version>2.0.8.1</mallet.version>
 	  <mockito.version>1.9.5</mockito.version>
-	  <librairy.nlp.version>[0.1,)</librairy.nlp.version>
+	  <librairy.nlp.version>[1.0,)</librairy.nlp.version>
 	  <librairy.modeler.version>[1.0,)</librairy.modeler.version>
 	  <librairy.swagger.version>[0.3,)</librairy.swagger.version>
 	  <testutils.version>1.0.0</testutils.version>
@@ -186,6 +186,11 @@
 		  <dependency>
 			  <groupId>org.apache.commons</groupId>
 			  <artifactId>commons-math3</artifactId>
+		  </dependency>
+
+		  <dependency>
+			  <groupId>org.apache.commons</groupId>
+			  <artifactId>commons-lang3</artifactId>
 		  </dependency>
 
 		  <!-- Unit tests -->

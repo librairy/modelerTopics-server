@@ -1,10 +1,9 @@
 package org.librairy.service.modeler.client;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
+import org.librairy.service.nlp.facade.model.Group;
 import org.librairy.service.nlp.facade.model.PoS;
-import org.librairy.service.nlp.facade.model.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +26,7 @@ public class LibrairyNlpClientIntTest {
         LibrairyNlpClient client = new LibrairyNlpClient();
         client.setNlpEndpoint("http://localhost:8085");
         client.setup();
-        List<Token> tokens = client.bow(text, "en", Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB}));
+        List<Group> tokens = client.bow(text, "en", Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB}), false);
         tokens.forEach(token -> LOG.info(""+token));
     }
 
@@ -37,7 +36,7 @@ public class LibrairyNlpClientIntTest {
         LibrairyNlpClient client = new LibrairyNlpClient();
         client.setNlpEndpoint("localhost");
         client.setup();
-        List<Token> tokens = client.bow(text, "en", Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB}));
+        List<Group> tokens = client.bow(text, "en", Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB}), false);
         tokens.forEach(token -> LOG.info(""+token));
     }
 
