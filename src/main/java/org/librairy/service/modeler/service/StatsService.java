@@ -21,6 +21,7 @@ public class StatsService {
 
     public static String from(double[] valuesArray){
         StringBuilder stats = new StringBuilder();
+        if (valuesArray == null || valuesArray.length == 0 ) return "Empty Stats";
         StandardDeviation stdDev = new StandardDeviation();
         stats.append("min=").append(Double.valueOf(StatUtils.min(valuesArray))).append("|");
         stats.append("max=").append(Double.valueOf(StatUtils.max(valuesArray))).append("|");

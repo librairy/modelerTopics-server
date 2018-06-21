@@ -21,6 +21,10 @@ public class ModelParams implements Serializable{
 
     Integer numRetries      = 10;
 
+    Integer minFreq         = 0;
+
+    Double  maxDocRatio     = 1.0;
+
     String corpusFile;
 
     String outputDir;
@@ -177,6 +181,22 @@ public class ModelParams implements Serializable{
         this.entities = entities;
     }
 
+    public Integer getMinFreq() {
+        return minFreq;
+    }
+
+    public void setMinFreq(Integer minFreq) {
+        this.minFreq = minFreq;
+    }
+
+    public Double getMaxDocRatio() {
+        return maxDocRatio;
+    }
+
+    public void setMaxDocRatio(Double maxDocRatio) {
+        this.maxDocRatio = maxDocRatio;
+    }
+
     @Override
     public String toString() {
         return "ModelParams{" +
@@ -186,6 +206,8 @@ public class ModelParams implements Serializable{
                 ", numTopWords=" + numTopWords +
                 ", numIterations=" + numIterations +
                 ", numRetries=" + numRetries +
+                ", minFreq=" + minFreq +
+                ", maxDocRatio=" + maxDocRatio +
                 ", corpusFile='" + corpusFile + '\'' +
                 ", outputDir='" + outputDir + '\'' +
                 ", language='" + language + '\'' +

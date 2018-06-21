@@ -95,6 +95,12 @@ public class ModelLauncher {
             params.put("iterations",String.valueOf(parameters.getNumIterations()));
             params.put("optimization",String.valueOf(parameters.getNumRetries()));
             params.put("top-words",String.valueOf(parameters.getNumTopWords()));
+            params.put("min-freq",String.valueOf(parameters.getMinFreq()));
+            params.put("max-doc-ratio",String.valueOf(parameters.getMaxDocRatio()));
+            params.put("stop-words",parameters.getStopwords().toString());
+            params.put("multi-words",String.valueOf(parameters.getEntities()));
+            params.put("opt-iterations",String.valueOf(parameters.getNumRetries()));
+
 
             LOG.info("saving model stats..");
             TopicModelDiagnostics diagnostics = new TopicModelDiagnostics(model, numTopWords<0?50:numTopWords);
@@ -104,7 +110,7 @@ public class ModelLauncher {
             stats.put("vocabulary", String.valueOf(model.alphabet.size()));
             if (model.docLengthCounts != null) stats.put("doc-lengths", StatsService.from(model.docLengthCounts));
             stats.put("num-topics", String.valueOf(model.getNumTopics()));
-            stats.put("stopwords", model.stoplist.toString());
+            stats.put("stop-words", model.stoplist.size() > 1000? model.stoplist.subList(0,1000).toString() : model.stoplist.toString());
             stats.put("topic-coherence", StatsService.from(diagnostics.getCoherence().scores));
             stats.put("topic-distance", StatsService.from(diagnostics.getDistanceFromCorpus().scores));
             stats.put("alpha-sum", String.valueOf(model.alphaSum));
