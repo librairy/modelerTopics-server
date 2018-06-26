@@ -24,6 +24,8 @@ public class BoWService {
             .addEscape('\n'," ")
             .addEscape('\r'," ")
             .addEscape('\t'," ")
+            .addEscape('=',"")
+            .addEscape('#',"")
             .build();
 
     public static String toText(List<Group> groups){
