@@ -32,7 +32,7 @@ public class BoWService {
 
         if (groups.isEmpty()) return "";
 
-        return groups.stream().map(token -> escaper.escape(token.getToken()) + "=" + token.getFreq() + "#" + token.getPos() + "#").collect(Collectors.joining(" "));
+        return groups.stream().filter(token -> !token.getToken().contains(" ")).map(token -> escaper.escape(token.getToken()) + "=" + token.getFreq() + "#" + token.getPos() + "#").collect(Collectors.joining(" "));
     }
 
 }
