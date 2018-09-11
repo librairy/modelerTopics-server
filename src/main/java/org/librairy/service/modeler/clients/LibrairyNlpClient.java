@@ -8,6 +8,9 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.librairy.service.nlp.facade.AvroClient;
@@ -25,7 +28,12 @@ import org.thymeleaf.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,6 +73,35 @@ public class LibrairyNlpClient {
                 }
             }
         });
+
+        try {
+
+            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                }
+
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                }
+
+            } };
+
+
+            SSLContext sslcontext = SSLContext.getInstance("SSL");
+            sslcontext.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
+            CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+            Unirest.setHttpClient(httpclient);
+
+        } catch (Exception e) {
+            LOG.error("HTTP Error",e);
+        }
+
+
     }
 
 
@@ -94,10 +131,16 @@ public class LibrairyNlpClient {
                             public AvroClient load(String key) throws IOException {
                                 AvroClient client = new AvroClient();
                                 String language = StringUtils.substringAfter(key,"-lang:");
-                                String nlpServiceEndpoint = nlpEndpoint.replace("%%", language);
+                                Integer port = 65111;
+                                String url = nlpEndpoint;
+                                if (nlpEndpoint.contains(":")){
+                                    port = Integer.valueOf(org.apache.commons.lang3.StringUtils.substringAfterLast(nlpEndpoint,":"));
+                                    url = org.apache.commons.lang3.StringUtils.substringBefore(nlpEndpoint,":");
+                                }
+                                String nlpServiceEndpoint = url.replace("%%", language);
                                 try {
                                     LOG.info("Creating a new AVRO connection to: " + nlpServiceEndpoint);
-                                    client.open(nlpServiceEndpoint,65111);
+                                    client.open(nlpServiceEndpoint,port);
                                     return client;
                                 } catch (Exception e) {
                                     LOG.error("Error connecting to nlp service: " + nlpServiceEndpoint, e);

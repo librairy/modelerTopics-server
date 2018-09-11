@@ -77,8 +77,9 @@ public class Inferencer {
         int burnIn = 0;
         double[] topicDistribution = topicInferer.getSampledDistribution(instances.get(0), numIterations, thinning, burnIn);
 
+        String description = text.length() < 10 ? text : text.substring(0,10);
 
-        LOG.debug("Topic Distribution of: " + text.substring(0,10)+ ".. " + Arrays.toString(topicDistribution));
+        LOG.debug("Topic Distribution of: " + description + ".. " + Arrays.toString(topicDistribution));
         return Doubles.asList(topicDistribution);
 
     }
