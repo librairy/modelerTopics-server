@@ -8,7 +8,8 @@ import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Doubles;
-import org.librairy.service.modeler.builders.PipeBuilder;
+import org.librairy.service.modeler.builders.BoWPipeBuilder;
+import org.librairy.service.modeler.builders.PipeBuilderFactory;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.librairy.service.nlp.facade.model.Group;
 import org.librairy.service.nlp.facade.model.PoS;
@@ -32,6 +33,7 @@ public class Inferencer {
     private final String pos;
     private final Boolean multigrams;
     private final List<PoS> posList;
+    private final Boolean raw;
 
     public Inferencer(ModelLauncher ldaLauncher, LibrairyNlpClient client, ModelParams params, String resourceFolder) throws Exception {
 
@@ -41,6 +43,7 @@ public class Inferencer {
         this.pos                        = params.getPos();
         this.posList                    = Strings.isNullOrEmpty(pos) ? Collections.emptyList() : Arrays.asList(pos.split(" ")).stream().map(i -> PoS.valueOf(i.toUpperCase())).collect(Collectors.toList());
         this.multigrams                 = params.getEntities();
+        this.raw                        = params.getRaw();
     }
 
     public Inferencer(TopicInferencer inferencer, LibrairyNlpClient client, ModelParams params) {
@@ -50,6 +53,7 @@ public class Inferencer {
         this.pos                        = params.getPos();
         this.posList                    = Strings.isNullOrEmpty(pos) ? Collections.emptyList() : Arrays.asList(pos.split(" ")).stream().map(i -> PoS.valueOf(i.toUpperCase())).collect(Collectors.toList());
         this.multigrams                 = params.getEntities();
+        this.raw                        = params.getRaw();
     }
 
 
@@ -69,7 +73,7 @@ public class Inferencer {
 
 
         Instance rawInstance = new Instance(data,target,name,source);
-        Pipe pipe = new PipeBuilder().build(this.pos);
+        Pipe pipe = PipeBuilderFactory.newInstance(raw).build(this.pos);
         InstanceList instances = new InstanceList(pipe);
         instances.addThruPipe(rawInstance);
 

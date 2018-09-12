@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-public class PipeBuilder {
+public class BoWPipeBuilder implements PipeBuilderI {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PipeBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BoWPipeBuilder.class);
 
-    public PipeBuilder() {
+    public BoWPipeBuilder() {
     }
 
     public Pipe build(String pos) {

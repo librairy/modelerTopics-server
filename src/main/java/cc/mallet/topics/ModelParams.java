@@ -45,6 +45,8 @@ public class ModelParams implements Serializable{
 
     List<String> stopwords  = new ArrayList<>();
 
+    Boolean raw             = false;
+
     public ModelParams(String corpusFile, String outputDir) {
         this.corpusFile = corpusFile;
         this.outputDir = outputDir;
@@ -197,6 +199,14 @@ public class ModelParams implements Serializable{
         this.maxDocRatio = maxDocRatio;
     }
 
+    public Boolean getRaw() {
+        return raw;
+    }
+
+    public void setRaw(Boolean raw) {
+        this.raw = raw;
+    }
+
     @Override
     public String toString() {
         return "ModelParams{" +
@@ -218,6 +228,7 @@ public class ModelParams implements Serializable{
                 ", pos='" + pos + '\'' +
                 ", entities=" + entities +
                 ", stopwords=" + stopwords +
+                ", raw=" + raw +
                 '}';
     }
 }

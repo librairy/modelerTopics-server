@@ -63,9 +63,10 @@ public class InferencePoolManager {
                 .maximumSize(maxThreads)
                 .build(
                         new CacheLoader<Long, Inferencer>() {
-                            public Inferencer load(Long key) {
+                            public Inferencer load(Long key) throws Exception {
                                 LOG.info("Inferencer instantiated for thread: " + key + " /  Total:" + (inferenceCache.size()+1));
-                                return new Inferencer(inferencer.getTopicInferer(), client, topicsService.getParameters());
+                                if (inferencer == null) return new Inferencer(ldaLauncher,client,topicsService.getParameters(),resourceFolder);
+                                else return new Inferencer(inferencer.getTopicInferer(), client, topicsService.getParameters());
                             }
                 });
 
