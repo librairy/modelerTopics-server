@@ -5,6 +5,7 @@ import cc.mallet.topics.ModelParams;
 import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
+import cc.mallet.util.ParallelExecutor;
 import org.apache.avro.AvroRemoteException;
 import org.librairy.service.modeler.facade.model.Dimension;
 import org.librairy.service.modeler.facade.model.Element;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +40,7 @@ public class TopicsService {
     private Model model;
     private List topics = new ArrayList();
     private Map<Integer, List<Element>> words = new HashMap<>();
+    private Map<Integer, List<Element>> tfidfWords = new HashMap<>();
     private ModelParams parameters;
 
     @PostConstruct
@@ -53,8 +57,9 @@ public class TopicsService {
     public void remove(){
         modelLauncher.removeModel(resourceFolder);
         topics = new ArrayList();
-        words = new HashMap<>();
         model = new Model();
+        words = new ConcurrentHashMap<>();
+        tfidfWords = new ConcurrentHashMap<>();
     }
 
     public void loadModel() throws Exception {
@@ -63,6 +68,16 @@ public class TopicsService {
         model       = modelLauncher.getDetails(resourceFolder);
         topics      = modelLauncher.readTopics(resourceFolder);
         words       = modelLauncher.readTopicWords(resourceFolder);
+
+        // create TF/IDF visualization of word topics
+        LOG.info("Calculating TF-IDF terms score for topic sorting..");
+        ParallelExecutor executor = new ParallelExecutor();
+        for(Integer topicId: words.keySet()){
+            final Integer id = topicId;
+            executor.submit(() -> tfidfWords.put(id, words.get(id).stream().map(el -> new Element(el.getValue(), tfidf(el))).sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList()) ));
+        }
+        executor.awaitTermination(1, TimeUnit.HOURS);
+
         LOG.info("Model ready!");
     }
 
@@ -120,6 +135,28 @@ public class TopicsService {
         //return words.get(topicId).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).skip(offset).limit(maxWords).collect(Collectors.toList());
         return words.get(topicId).stream().skip(offset).limit(maxWords).collect(Collectors.toList());
 
+    }
+
+    public List<Element> getWordsByTFIDF(int topicId, int maxWords, int offset) throws AvroRemoteException {
+        if (!words.containsKey(topicId)) return Collections.emptyList();
+        //return words.get(topicId).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).skip(offset).limit(maxWords).collect(Collectors.toList());
+        return tfidfWords.get(topicId).stream().skip(offset).limit(maxWords).collect(Collectors.toList());
+
+    }
+
+    private Double tfidf(Element el){
+        Double tf = el.getScore();
+        Double idf = idf(el.getValue());
+        return tf*idf;
+    }
+
+    private Double idf(String term){
+        // total docs
+        int n = words.size();
+        // docs with term
+        long d = words.entrySet().stream().filter(entry -> entry.getValue().stream().filter(el -> el.getValue().equalsIgnoreCase(term)).count() > 0).count();
+        if (d == 0) return 0.0;
+        return Math.log(Double.valueOf(n)/Double.valueOf(d));
     }
 
     public ModelParams getParameters() {

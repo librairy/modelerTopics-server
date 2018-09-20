@@ -125,12 +125,19 @@ public class ModelLauncher {
             LOG.info("saving model topics..");
             Map<Integer, List<Element>> topWords = topicsService.getTopWords(model, numTopWords);
 
+            // calculate entropy for each topic
+            Map<Integer,Double> entropies = new HashMap<>();
+
+            for(Integer topicId : topWords.keySet()){
+                entropies.put(topicId,StatsService.entropy(topWords.get(topicId).stream().map(el -> el.getScore()).collect(Collectors.toList())));
+            }
+
             // save topic words
             List<String> topicWords = topWords.entrySet().parallelStream().flatMap(entry -> entry.getValue().stream().map(word -> entry.getKey() + ";;" + word.getValue() + ";;" + word.getScore() +"\n")).collect(Collectors.toList());
             saveToFile(topicWords, Paths.get(baseDir, "model-topic-words.csv.gz"));
 
             // save topics
-            List<String> topics = IntStream.range(0, topWords.size()).parallel().mapToObj(i -> i + ";;" + model.getTopicAlphabet().lookupObject(i) + ";;" + topWords.get(i).stream().sorted( (a,b) -> -a.getScore().compareTo(b.getScore())).limit(10).map(w -> w.getValue()).collect(Collectors.joining(","))+"\n").collect(Collectors.toList());
+            List<String> topics = IntStream.range(0, topWords.size()).parallel().mapToObj(i -> i + ";;" + model.getTopicAlphabet().lookupObject(i) + ";;" + topWords.get(i).stream().sorted( (a,b) -> -a.getScore().compareTo(b.getScore())).limit(10).map(w -> w.getValue()).collect(Collectors.joining(","))+ ";;" +  entropies.get(i) + "\n").collect(Collectors.toList());
             saveToFile(topics, Paths.get(baseDir, "model-topics.csv.gz"));
 
             LOG.info("saving model inferencer..");
@@ -190,6 +197,7 @@ public class ModelLauncher {
             dimension.setId(Integer.valueOf(values[0]));
             dimension.setName(values[1]);
             dimension.setDescription(values[2]);
+            if (values.length > 3) dimension.setEntropy(Double.valueOf(values[3]));
             return  dimension;
         }).collect(Collectors.toList());
     }
