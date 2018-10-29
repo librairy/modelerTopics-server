@@ -12,25 +12,17 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.librairy.service.modeler.Application;
-import org.librairy.service.modeler.facade.rest.model.InferenceRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-public class DimensionsTest {
+public class TopicsTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DimensionsTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TopicsTest.class);
 
     @Before
     public void setup(){
@@ -65,9 +57,9 @@ public class DimensionsTest {
 
         // Get Topic List
 
-        HttpResponse<JsonNode> response = Unirest.get(baseUrl + "/dimensions").asJson();
+        HttpResponse<JsonNode> response = Unirest.get(baseUrl + "/topics").asJson();
 
-        JSONArray topicList = response.getBody().getObject().getJSONArray("dimensions");
+        JSONArray topicList = response.getBody().getObject().getJSONArray("topics");
 
         Set<String> invalidWords = new TreeSet<>();
 
@@ -88,7 +80,7 @@ public class DimensionsTest {
             Integer numWords = 0;
 
             while(!finished){
-                HttpResponse<JsonNode> responseByTopic = Unirest.get(baseUrl + "/dimensions/"+topicId)
+                HttpResponse<JsonNode> responseByTopic = Unirest.get(baseUrl + "/topics/"+topicId)
                         .queryString(ImmutableMap.of("maxWords",maxWords,"offset",offset))
                         .asJson();
 

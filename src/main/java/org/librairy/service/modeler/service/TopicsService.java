@@ -5,11 +5,9 @@ import cc.mallet.topics.ModelParams;
 import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
-import cc.mallet.util.ParallelExecutor;
 import org.apache.avro.AvroRemoteException;
-import org.librairy.service.modeler.facade.model.Dimension;
-import org.librairy.service.modeler.facade.model.Element;
-import org.librairy.service.modeler.facade.model.Model;
+import org.librairy.service.modeler.builders.TFIDFTopicBuilder;
+import org.librairy.service.modeler.facade.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -37,10 +34,11 @@ public class TopicsService {
     @Autowired
     ModelLauncher modelLauncher;
 
-    private Model model;
-    private List topics = new ArrayList();
-    private Map<Integer, List<Element>> words = new HashMap<>();
-    private Map<Integer, List<Element>> tfidfWords = new HashMap<>();
+    private Settings settings;
+    private Map<Integer,Topic> topics = new HashMap<>();
+    private Map<Integer, List<TopicNeighbour>> topicNeighbours = new HashMap<>();
+    private Map<Integer, List<TopicWord>> words = new HashMap<>();
+    private Map<Integer, List<TopicWord>> tfidfWords = new HashMap<>();
     private ModelParams parameters;
 
     @PostConstruct
@@ -56,39 +54,40 @@ public class TopicsService {
 
     public void remove(){
         modelLauncher.removeModel(resourceFolder);
-        topics = new ArrayList();
-        model = new Model();
-        words = new ConcurrentHashMap<>();
-        tfidfWords = new ConcurrentHashMap<>();
+        topics          = new HashMap<>();
+        settings        = new Settings();
+        words           = new ConcurrentHashMap<>();
+        topicNeighbours = new ConcurrentHashMap<>();
+        tfidfWords      = new ConcurrentHashMap<>();
     }
 
     public void loadModel() throws Exception {
         LOG.info("Reading existing topic model");
-        parameters  = modelLauncher.readParameters(resourceFolder);
-        model       = modelLauncher.getDetails(resourceFolder);
-        topics      = modelLauncher.readTopics(resourceFolder);
-        words       = modelLauncher.readTopicWords(resourceFolder);
-
-        // create TF/IDF visualization of word topics
-        LOG.info("Calculating TF-IDF terms score for topic sorting..");
-        ParallelExecutor executor = new ParallelExecutor();
-        for(Integer topicId: words.keySet()){
-            final Integer id = topicId;
-            executor.submit(() -> tfidfWords.put(id, words.get(id).stream().map(el -> new Element(el.getValue(), tfidf(el))).sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList()) ));
-        }
-        executor.awaitTermination(1, TimeUnit.HOURS);
-
+        parameters          = modelLauncher.readParameters(resourceFolder);
+        settings            = modelLauncher.getDetails(resourceFolder);
+        topics              = modelLauncher.readTopics(resourceFolder);
+        words               = modelLauncher.readTopicWords(resourceFolder);
+        topicNeighbours     = modelLauncher.readTopicNeighbours(resourceFolder);
+        tfidfWords          = TFIDFTopicBuilder.calculate(words);
         LOG.info("Model ready!");
     }
 
-    public Map<Integer,List<Element>> getTopWords(ParallelTopicModel topicModel, int numWords) throws Exception {
+    public List<TopicNeighbour> getNeighbours(Integer topicId, Integer max, Similarity similarity){
+        if (!topicNeighbours.containsKey(topicId)) return Collections.emptyList();
+        return  topicNeighbours.get(topicId).stream().filter(tc -> tc.getSimilarity().equals(similarity))
+                .limit(max)
+                .map(tn -> TopicNeighbour.newBuilder().setId(tn.getId()).setDescription(topics.get(tn.getId()).getDescription()).setScore(tn.getScore()).setSimilarity(tn.getSimilarity()).build())
+                .collect(Collectors.toList());
+    }
+
+    public Map<Integer,List<TopicWord>> getTopWords(ParallelTopicModel topicModel, int numWords) throws Exception {
 
         int numTopics = topicModel.getNumTopics();
         Alphabet alphabet = topicModel.getAlphabet();
 
         ArrayList<TreeSet<IDSorter>> topicSortedWords = topicModel.getSortedWords();
 
-        Map<Integer,List<Element>> result = new HashMap<>();
+        Map<Integer,List<TopicWord>> result = new HashMap<>();
 
         for (int topic = 0; topic < numTopics; topic++) {
 
@@ -108,12 +107,12 @@ public class TopicsService {
 
             LOG.info("Topic " + topic + " with " + limit + " words");
 
-            List<Element> words = new ArrayList<>();
+            List<TopicWord> words = new ArrayList<>();
 
             Iterator<IDSorter> iterator = sortedWords.iterator();
             for (int i=0; i < limit; i++) {
                 IDSorter info = iterator.next();
-                words.add(new Element(String.valueOf(alphabet.lookupObject(info.getID())),info.getWeight()/totalWeight));
+                words.add(new TopicWord(String.valueOf(alphabet.lookupObject(info.getID())),info.getWeight()/totalWeight));
             }
             result.put(topic,words);
         }
@@ -121,30 +120,33 @@ public class TopicsService {
         return result;
     }
 
-    public List<Dimension> getTopics() throws AvroRemoteException {
-        return topics;
+    public Topic get(Integer id){
+        if (!topics.containsKey(id)) throw new RuntimeException("Topic Id not-found");
+        return topics.get(id);
     }
 
-    public Model getModel() throws AvroRemoteException {
-        return model;
+    public List<TopicSummary> getTopics() throws AvroRemoteException {
+        return topics.entrySet().stream().sorted((a,b) -> a.getKey().compareTo(b.getKey())).map(entry -> TopicSummary.newBuilder().setId(entry.getKey()).setDescription(entry.getValue().getDescription()).build()).collect(Collectors.toList());
+    }
+
+    public Settings getSettings() throws AvroRemoteException {
+        return settings;
     }
 
 
-    public List<Element> getWords(int topicId, int maxWords, int offset) throws AvroRemoteException {
+    public List<TopicWord> getWords(int topicId, int maxWords, int offset) throws AvroRemoteException {
         if (!words.containsKey(topicId)) return Collections.emptyList();
-        //return words.get(topicId).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).skip(offset).limit(maxWords).collect(Collectors.toList());
         return words.get(topicId).stream().skip(offset).limit(maxWords).collect(Collectors.toList());
 
     }
 
-    public List<Element> getWordsByTFIDF(int topicId, int maxWords, int offset) throws AvroRemoteException {
+    public List<TopicWord> getWordsByTFIDF(int topicId, int maxWords, int offset) throws AvroRemoteException {
         if (!words.containsKey(topicId)) return Collections.emptyList();
-        //return words.get(topicId).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).skip(offset).limit(maxWords).collect(Collectors.toList());
         return tfidfWords.get(topicId).stream().skip(offset).limit(maxWords).collect(Collectors.toList());
 
     }
 
-    private Double tfidf(Element el){
+    private Double tfidf(TopicWord el){
         Double tf = el.getScore();
         Double idf = idf(el.getValue());
         return tf*idf;

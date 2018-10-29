@@ -9,9 +9,9 @@ import java.util.List;
  */
 public class ModelParams implements Serializable{
 
-    Double alpha            = 0.1;
+    Double alpha            = 0.0;
 
-    Double beta             = 0.001;
+    Double beta             = 0.0;
 
     Integer numTopics       = 10;
 
@@ -43,6 +43,8 @@ public class ModelParams implements Serializable{
 
     Boolean entities        = false;
 
+    Boolean inference       = false;
+
     List<String> stopwords  = new ArrayList<>();
 
     Boolean raw             = false;
@@ -64,7 +66,7 @@ public class ModelParams implements Serializable{
     }
 
     public Double getAlpha() {
-        return alpha;
+        return alpha == 0.0? (numTopics > 50? 50.0 / numTopics : 0.1) : 0.1;
     }
 
     public void setAlpha(Double alpha) {
@@ -72,7 +74,7 @@ public class ModelParams implements Serializable{
     }
 
     public Double getBeta() {
-        return beta;
+        return beta == 0.0? 0.1 : beta;
     }
 
     public void setBeta(Double beta) {
@@ -207,6 +209,14 @@ public class ModelParams implements Serializable{
         this.raw = raw;
     }
 
+    public Boolean getInference() {
+        return inference;
+    }
+
+    public void setInference(Boolean inference) {
+        this.inference = inference;
+    }
+
     @Override
     public String toString() {
         return "ModelParams{" +
@@ -229,6 +239,7 @@ public class ModelParams implements Serializable{
                 ", entities=" + entities +
                 ", stopwords=" + stopwords +
                 ", raw=" + raw +
+                ", raw=" + inference +
                 '}';
     }
 }

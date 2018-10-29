@@ -55,7 +55,7 @@ public class RestTest {
     @Ignore
     public void post() throws UnirestException {
 
-        InferenceRequest req = new InferenceRequest("sample text");
+        InferenceRequest req = new InferenceRequest("sample text",false);
 
         HttpResponse<JsonNode> response = Unirest.post("http://localhost:7777/inference")
                 .header("accept", "application/json")

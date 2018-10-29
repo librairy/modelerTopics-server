@@ -1,0 +1,10 @@
+version: '2'
+services:
+  topic-model:
+    image: sesiad/cordis-model:0.5-70
+    cpuset: "1"
+    ports:
+     - "7777:7777"
+    environment:
+      - JAVA_OPTS=-Xmx4192m
+      - REST_PATH=/topics

@@ -31,7 +31,7 @@ public class AvroIntTest {
 
         client.open(host,port);
 
-        client.inference("sample text");
+        client.createInference("sample text",false);
 
         client.close();
     }

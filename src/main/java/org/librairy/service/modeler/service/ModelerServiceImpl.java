@@ -1,5 +1,6 @@
 package org.librairy.service.modeler.service;
 
+import io.swagger.models.auth.In;
 import org.apache.avro.AvroRemoteException;
 import org.librairy.service.modeler.facade.model.*;
 import org.slf4j.Logger;
@@ -39,47 +40,40 @@ public class ModelerServiceImpl implements ModelerService {
     }
 
     @Override
-    public List<Dimension> dimensions() throws AvroRemoteException {
+    public Inference createInference(String text, boolean topics) throws AvroRemoteException {
+        try {
+
+            List<Double> shape = inferencePoolManager.get(Thread.currentThread()).inference(text);
+            if (!topics) return Inference.newBuilder().setVector(shape).build();
+
+            return Inference.newBuilder().setVector(shape).setTopics(getTopics()).build();
+        } catch (Exception e) {
+            throw new AvroRemoteException("Error loading topic model",e);
+        }
+    }
+
+    @Override
+    public List<TopicSummary> getTopics() throws AvroRemoteException {
         return topicsService.getTopics();
     }
 
     @Override
-    public List<Element> elements(int topicId, int maxWords, int offset, boolean tfidf) throws AvroRemoteException {
-        return tfidf? topicsService.getWordsByTFIDF(topicId, maxWords, offset) : topicsService.getWords(topicId,maxWords,offset);
+    public Topic getTopic(int id) throws AvroRemoteException {
+        return topicsService.get(id);
     }
 
     @Override
-    public Model model() throws AvroRemoteException {
-        return topicsService.getModel();
+    public List<TopicWord> getTopicWords(int topicId, int max, int offset, boolean tfidf) throws AvroRemoteException {
+        return tfidf? topicsService.getWordsByTFIDF(topicId, max, offset) : topicsService.getWords(topicId,max,offset);
     }
 
     @Override
-    public List<Relevance> inference(String s) throws AvroRemoteException {
-        try {
-
-            List<Double> shape = shape(s);
-            List<Dimension> topics = dimensions();
-
-            List<Relevance> topicDistributions = new ArrayList<>();
-            for(int i=0;i<topics.size();i++){
-                Relevance topicDistribution = new Relevance();
-                topicDistribution.setDimension(topics.get(i));
-                topicDistribution.setScore(shape.get(i));
-                topicDistributions.add(topicDistribution);
-            }
-            return topicDistributions;
-        } catch (Exception e) {
-            throw new AvroRemoteException("Error loading topic model",e);
-        }
+    public List<TopicNeighbour> getTopicNeighbours(int id, int max, Similarity similarity) throws AvroRemoteException {
+        return topicsService.getNeighbours(id, max, similarity);
     }
 
     @Override
-    public List<Double> shape(String s) throws AvroRemoteException {
-        try {
-            List<Double> shape = inferencePoolManager.get(Thread.currentThread()).inference(s);
-            return shape;
-        } catch (Exception e) {
-            throw new AvroRemoteException("Error loading topic model",e);
-        }
+    public Settings getSettings() throws AvroRemoteException {
+        return topicsService.getSettings();
     }
 }

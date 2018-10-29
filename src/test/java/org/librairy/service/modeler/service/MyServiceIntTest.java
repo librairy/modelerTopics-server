@@ -3,6 +3,7 @@ package org.librairy.service.modeler.service;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.librairy.service.modeler.Application;
+import org.librairy.service.modeler.facade.model.Inference;
 import org.librairy.service.modeler.facade.model.ModelerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class MyServiceIntTest {
     public void inferenceTest() throws IOException {
 
 
-        List<Double> result = service.shape("sample text");
+        Inference result = service.createInference("sample text",false);
 
         LOG.info("Result: " + result);
 

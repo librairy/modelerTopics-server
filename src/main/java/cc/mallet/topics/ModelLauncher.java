@@ -8,9 +8,7 @@ import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
-import org.librairy.service.modeler.facade.model.Dimension;
-import org.librairy.service.modeler.facade.model.Element;
-import org.librairy.service.modeler.facade.model.Model;
+import org.librairy.service.modeler.facade.model.*;
 import org.librairy.service.modeler.service.StatsService;
 import org.librairy.service.modeler.service.TimeService;
 import org.librairy.service.modeler.service.TopicsService;
@@ -40,9 +38,9 @@ public class ModelLauncher {
 
     private static final Logger LOG = LoggerFactory.getLogger(ModelLauncher.class);
 
-    DatumWriter<Model> modelDatumWriter = new SpecificDatumWriter<Model>(Model.class);
+    DatumWriter<Settings> modelDatumWriter = new SpecificDatumWriter<Settings>(Settings.class);
 
-    DatumReader<Model> modelDatumReader = new SpecificDatumReader<Model>(Model.class);
+    DatumReader<Settings> modelDatumReader = new SpecificDatumReader<Settings>(Settings.class);
 
     ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -56,7 +54,7 @@ public class ModelLauncher {
     public boolean removeModel(String baseDir){
         try{
             Paths.get(baseDir,"model-inferencer.bin").toFile().delete();
-            Paths.get(baseDir,"model-stats.bin").toFile().delete();
+            Paths.get(baseDir,"model-settings.bin").toFile().delete();
             Paths.get(baseDir,"model-parameters.bin").toFile().delete();
             Paths.get(baseDir,"model-topics.csv.gz").toFile().delete();
             Paths.get(baseDir,"model-topic-words.csv.gz").toFile().delete();
@@ -71,10 +69,10 @@ public class ModelLauncher {
         return TopicInferencer.read(Paths.get(baseDir,"model-inferencer.bin").toFile());
     }
 
-    public Model getDetails(String baseDir) throws Exception {
+    public Settings getDetails(String baseDir) throws Exception {
 
-        DataFileReader<Model> dataFileReader = new DataFileReader<Model>(Paths.get(baseDir,"model-stats.bin").toFile(), modelDatumReader);
-        Model model = dataFileReader.next();
+        DataFileReader<Settings> dataFileReader = new DataFileReader<Settings>(Paths.get(baseDir,"model-settings.bin").toFile(), modelDatumReader);
+        Settings model = dataFileReader.next();
         dataFileReader.close();
         return model;
 
@@ -84,6 +82,33 @@ public class ModelLauncher {
         try {
             File modelFolder = new File(baseDir);
             if (!modelFolder.exists()) modelFolder.mkdirs();
+
+
+            LOG.info("saving doctopics .. ");
+            File docTopicsFile = Paths.get(baseDir, "doctopics.csv.gz").toFile();
+            if (docTopicsFile.exists()) docTopicsFile.delete();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(docTopicsFile, true))));
+            Map<Integer, Map<Integer, Integer>> concurrenceTopicMap = model.printDenseDocumentTopicsAsCSV(new PrintWriter(writer));
+            writer.close();
+            LOG.info("doctopics file created at: " + docTopicsFile.getAbsolutePath());
+
+
+            LOG.info("saving topic neighbours by concurrence.. ");
+            File coTopicsFile = Paths.get(baseDir, "model-topic-neighbours.csv.gz").toFile();
+            if (coTopicsFile.exists()) coTopicsFile.delete();
+            BufferedWriter w2 = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(coTopicsFile, true))));
+            for (Integer topic : concurrenceTopicMap.keySet()){
+                Map<Integer, Integer> related = concurrenceTopicMap.get(topic);
+                for(Integer relTopic : related.keySet()){
+                    Integer freq = related.get(relTopic);
+                    Integer maxFreq = model.getData().size();
+                    Double score = Double.valueOf(freq) / Double.valueOf(maxFreq);
+                    w2.write(topic+";;"+relTopic+";;"+score+";;"+Similarity.CONCURRENCE.name()+"\n");
+                }
+            }
+            w2.close();
+            LOG.info("topic neighbours file created at: " + coTopicsFile.getAbsolutePath());
+
 
             LOG.info("saving model params..");
             Map<String,String> params = new HashMap<>();
@@ -98,8 +123,6 @@ public class ModelLauncher {
             params.put("min-freq",String.valueOf(parameters.getMinFreq()));
             params.put("max-doc-ratio",String.valueOf(parameters.getMaxDocRatio()));
             params.put("stop-words",parameters.getStopwords().toString());
-            params.put("multi-words",String.valueOf(parameters.getEntities()));
-            params.put("opt-iterations",String.valueOf(parameters.getNumRetries()));
 
 
             LOG.info("saving model stats..");
@@ -108,22 +131,21 @@ public class ModelLauncher {
             Map<String,String> stats = new HashMap<>();
             stats.put("loglikelihood", String.valueOf(model.modelLogLikelihood()));
             stats.put("vocabulary", String.valueOf(model.alphabet.size()));
-            if (model.docLengthCounts != null) stats.put("doc-lengths", StatsService.from(model.docLengthCounts));
-            stats.put("num-topics", String.valueOf(model.getNumTopics()));
-            stats.put("stop-words", model.stoplist.size() > 1000? model.stoplist.subList(0,1000).toString() : model.stoplist.toString());
+            stats.put("corpus", String.valueOf(model.getData().size()));
+            stats.put("model-stop-words", model.stoplist.size() > 1000? model.stoplist.subList(0,1000).toString() : model.stoplist.toString());
             stats.put("topic-coherence", StatsService.from(diagnostics.getCoherence().scores));
             stats.put("topic-distance", StatsService.from(diagnostics.getDistanceFromCorpus().scores));
             stats.put("alpha-sum", String.valueOf(model.alphaSum));
             stats.put("beta-sum", String.valueOf(model.betaSum));
 
-            Model modelDetails = Model.newBuilder().setAlgorithm(algorithm).setDate(TimeService.now()).setParams(params).setStats(stats).build();
-            DataFileWriter<Model> dataFileWriter = new DataFileWriter<Model>(modelDatumWriter);
-            dataFileWriter.create(modelDetails.getSchema(),Paths.get(baseDir,"model-stats.bin").toFile());
+            Settings modelDetails = Settings.newBuilder().setAlgorithm(algorithm).setDate(TimeService.now()).setParams(params).setStats(stats).build();
+            DataFileWriter<Settings> dataFileWriter = new DataFileWriter<Settings>(modelDatumWriter);
+            dataFileWriter.create(modelDetails.getSchema(),Paths.get(baseDir,"model-settings.bin").toFile());
             dataFileWriter.append(modelDetails);
             dataFileWriter.close();
 
             LOG.info("saving model topics..");
-            Map<Integer, List<Element>> topWords = topicsService.getTopWords(model, numTopWords);
+            Map<Integer, List<TopicWord>> topWords = topicsService.getTopWords(model, numTopWords);
 
             // calculate entropy for each topic
             Map<Integer,Double> entropies = new HashMap<>();
@@ -133,20 +155,22 @@ public class ModelLauncher {
             }
 
             // save topic words
-            List<String> topicWords = topWords.entrySet().parallelStream().flatMap(entry -> entry.getValue().stream().map(word -> entry.getKey() + ";;" + word.getValue() + ";;" + word.getScore() +"\n")).collect(Collectors.toList());
+            List<String> topicWords = topWords.entrySet().parallelStream().flatMap(entry -> entry.getValue().stream().map(word -> entry.getKey() + ";;" + word.getValue().replace(";","") + ";;" + word.getScore() +"\n")).collect(Collectors.toList());
             saveToFile(topicWords, Paths.get(baseDir, "model-topic-words.csv.gz"));
 
             // save topics
-            List<String> topics = IntStream.range(0, topWords.size()).parallel().mapToObj(i -> i + ";;" + model.getTopicAlphabet().lookupObject(i) + ";;" + topWords.get(i).stream().sorted( (a,b) -> -a.getScore().compareTo(b.getScore())).limit(10).map(w -> w.getValue()).collect(Collectors.joining(","))+ ";;" +  entropies.get(i) + "\n").collect(Collectors.toList());
+            List<String> topics = IntStream.range(0, topWords.size()).parallel().mapToObj(i -> i + ";;" + model.getTopicAlphabet().lookupObject(i) + ";;" + topWords.get(i).stream().sorted( (a,b) -> -a.getScore().compareTo(b.getScore())).limit(10).map(w -> w.getValue().replace(";","")).collect(Collectors.joining(","))+ ";;" +  entropies.get(i) + "\n").collect(Collectors.toList());
             saveToFile(topics, Paths.get(baseDir, "model-topics.csv.gz"));
+
+
+            LOG.info("saving topics statistics..");
+            saveParameters(baseDir, parameters);
 
             LOG.info("saving model inferencer..");
             ObjectOutputStream e2 = new ObjectOutputStream(new FileOutputStream(Paths.get(baseDir, "model-inferencer.bin").toFile()));
             e2.writeObject(model.getInferencer());
             e2.close();
 
-            LOG.info("saving topics statistics..");
-            saveParameters(baseDir, parameters);
             LOG.info("model saved successfully");
 
             topicsService.loadModel();
@@ -188,29 +212,36 @@ public class ModelLauncher {
         return lines;
     }
 
-    public List<Dimension> readTopics(String baseDir) throws IOException {
+    public Map<Integer,Topic> readTopics(String baseDir) throws IOException {
 
-        return readFromFile(Paths.get(baseDir,"model-topics.csv.gz")).parallelStream().map(line -> {
+        Map<Integer,Topic> topics = new ConcurrentHashMap<>();
+
+
+        readFromFile(Paths.get(baseDir,"model-topics.csv.gz")).parallelStream().forEach(line -> {
             String[] values = line.split(";;");
 
-            Dimension dimension = new Dimension();
-            dimension.setId(Integer.valueOf(values[0]));
-            dimension.setName(values[1]);
-            dimension.setDescription(values[2]);
-            if (values.length > 3) dimension.setEntropy(Double.valueOf(values[3]));
-            return  dimension;
-        }).collect(Collectors.toList());
+            Integer id          = Integer.valueOf(values[0]);
+            String name         = values[1];
+            String description  = values[2];
+            Double entropy      = values.length > 3? Double.valueOf(values[3]) : 0.0;
+
+            topics.put(id,Topic.newBuilder().setId(id).setName(name).setDescription(description).setEntropy(entropy).build());
+
+
+        });
+
+        return topics;
     }
 
-    public Map<Integer, List<Element>> readTopicWords(String baseDir) throws IOException {
+    public Map<Integer, List<TopicWord>> readTopicWords(String baseDir) throws IOException {
 
-        ConcurrentHashMap<Integer,List<Element>> topicWords = new ConcurrentHashMap();
+        ConcurrentHashMap<Integer,List<TopicWord>> topicWords = new ConcurrentHashMap();
 
         readFromFile(Paths.get(baseDir, "model-topic-words.csv.gz")).stream().forEach( line -> {
             String[] values = line.split(";;");
 
             Integer id = Integer.valueOf(values[0]);
-            Element word = new Element();
+            TopicWord word = new TopicWord();
             word.setValue(values[1]);
             word.setScore(Double.valueOf(values[2]));
 
@@ -230,6 +261,42 @@ public class ModelLauncher {
 
         return topicWords;
     }
+
+
+    public Map<Integer, List<TopicNeighbour>> readTopicNeighbours(String baseDir) throws IOException {
+
+        ConcurrentHashMap<Integer,List<TopicNeighbour>> topicNeighbours = new ConcurrentHashMap();
+
+        readFromFile(Paths.get(baseDir, "model-topic-neighbours.csv.gz")).stream().forEach( line -> {
+            String[] values = line.split(";;");
+
+            Integer topicId         = Integer.valueOf(values[0]);
+
+            Integer neighbourId     = Integer.valueOf(values[1]);
+
+            Double score            = Double.valueOf(values[2]);
+
+            Similarity similarity   = Similarity.valueOf(values[3].toUpperCase());
+
+            TopicNeighbour neighbour = TopicNeighbour.newBuilder().setId(neighbourId).setScore(score).setSimilarity(similarity).build();
+
+            if (!topicNeighbours.containsKey(topicId)){
+                topicNeighbours.put(topicId,new ArrayList<>());
+            }
+
+            topicNeighbours.get(topicId).add(neighbour);
+
+        });
+
+        // Sort topic words
+        LOG.info("sorting topic neighbours..");
+        topicNeighbours.keySet().parallelStream().forEach(key -> topicNeighbours.put(key, topicNeighbours.get(key).stream().sorted((a,b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList())));
+
+        topicNeighbours.entrySet().forEach(entry -> LOG.info("Topic " + entry.getKey() + " : " + entry.getValue().size() + " neighbours"));
+
+        return topicNeighbours;
+    }
+
 
     public void saveParameters(String baseDir, ModelParams parameters) throws IOException {
         jsonMapper.writeValue(Paths.get(baseDir,"model-parameters.bin").toFile(), parameters);
