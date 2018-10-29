@@ -126,7 +126,7 @@ public class TopicsService {
     }
 
     public List<TopicSummary> getTopics() throws AvroRemoteException {
-        return topics.entrySet().stream().sorted((a,b) -> a.getKey().compareTo(b.getKey())).map(entry -> TopicSummary.newBuilder().setId(entry.getKey()).setDescription(entry.getValue().getDescription()).build()).collect(Collectors.toList());
+        return topics.entrySet().stream().sorted((a,b) -> a.getKey().compareTo(b.getKey())).map(entry -> TopicSummary.newBuilder().setId(entry.getKey()).setName(entry.getValue().getName()).setDescription(entry.getValue().getDescription()).build()).collect(Collectors.toList());
     }
 
     public Settings getSettings() throws AvroRemoteException {
