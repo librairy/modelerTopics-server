@@ -55,7 +55,7 @@ public class InferencePoolManager {
 
         if (topicsService.getParameters() != null){
             LOG.info("Deserializing topic inferencer ..");
-            this.inferencer = new Inferencer(ldaLauncher,client,topicsService.getParameters(),resourceFolder);
+            this.inferencer = new Inferencer(ldaLauncher,client,topicsService.getParameters(),resourceFolder, ldaLauncher.readModelAlphabet(resourceFolder), ldaLauncher.readModelPipe(resourceFolder));
             LOG.info("done!");
         }
 
@@ -65,8 +65,8 @@ public class InferencePoolManager {
                         new CacheLoader<Long, Inferencer>() {
                             public Inferencer load(Long key) throws Exception {
                                 LOG.info("Inferencer instantiated for thread: " + key + " /  Total:" + (inferenceCache.size()+1));
-                                if (inferencer == null) return new Inferencer(ldaLauncher,client,topicsService.getParameters(),resourceFolder);
-                                else return new Inferencer(inferencer.getTopicInferer(), client, topicsService.getParameters());
+                                if (inferencer == null) return new Inferencer(ldaLauncher,client,topicsService.getParameters(),resourceFolder, ldaLauncher.readModelAlphabet(resourceFolder), ldaLauncher.readModelPipe(resourceFolder));
+                                else return new Inferencer(inferencer.getTopicInferer(), client, topicsService.getParameters(), inferencer.getAlphabet(), inferencer.getPipe());
                             }
                 });
 

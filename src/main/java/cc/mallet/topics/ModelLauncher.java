@@ -1,5 +1,8 @@
 package cc.mallet.topics;
 
+import cc.mallet.pipe.Pipe;
+import cc.mallet.types.Alphabet;
+import cc.mallet.types.InstanceList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import org.apache.avro.file.DataFileReader;
@@ -58,6 +61,8 @@ public class ModelLauncher {
             Paths.get(baseDir,"model-parameters.bin").toFile().delete();
             Paths.get(baseDir,"model-topics.csv.gz").toFile().delete();
             Paths.get(baseDir,"model-topic-words.csv.gz").toFile().delete();
+            Paths.get(baseDir,"model-alphabet.bin").toFile().delete();
+            Paths.get(baseDir,"model-pipe.bin").toFile().delete();
             return true;
         }catch (Exception e){
             LOG.warn("Error deleting models",e);
@@ -78,7 +83,7 @@ public class ModelLauncher {
 
     }
 
-    public void saveModel(String baseDir, String algorithm, ModelParams parameters, ParallelTopicModel model, Integer numTopWords) throws IOException {
+    public void saveModel(String baseDir, String algorithm, ModelParams parameters, ParallelTopicModel model, Integer numTopWords, Pipe pipe) throws IOException {
         try {
             File modelFolder = new File(baseDir);
             if (!modelFolder.exists()) modelFolder.mkdirs();
@@ -171,6 +176,17 @@ public class ModelLauncher {
             e2.writeObject(model.getInferencer());
             e2.close();
 
+            LOG.info("saving model alphabet..");
+            ObjectOutputStream e3 = new ObjectOutputStream(new FileOutputStream(Paths.get(baseDir, "model-alphabet.bin").toFile()));
+            e3.writeObject(model.getAlphabet());
+            e3.close();
+
+            LOG.info("saving model pipe..");
+            ObjectOutputStream e4 = new ObjectOutputStream(new FileOutputStream(Paths.get(baseDir, "model-pipe.bin").toFile()));
+            e4.writeObject(pipe);
+            e4.close();
+
+
             LOG.info("model saved successfully");
 
             topicsService.loadModel();
@@ -179,7 +195,21 @@ public class ModelLauncher {
             LOG.warn("Couldn\'t save model", var6);
         }
 
+    }
 
+
+    public Alphabet readModelAlphabet(String baseDir) throws IOException, ClassNotFoundException {
+        ObjectInputStream e3 = new ObjectInputStream(new FileInputStream(Paths.get(baseDir, "model-alphabet.bin").toFile()));
+        Alphabet alphabet = (Alphabet) e3.readObject();
+        e3.close();
+        return alphabet;
+    }
+
+    public Pipe readModelPipe(String baseDir) throws IOException, ClassNotFoundException {
+        ObjectInputStream e3 = new ObjectInputStream(new FileInputStream(Paths.get(baseDir, "model-pipe.bin").toFile()));
+        Pipe pipe = (Pipe) e3.readObject();
+        e3.close();
+        return pipe;
     }
 
     private void saveToFile(List<String> lines, Path filePath) throws IOException {

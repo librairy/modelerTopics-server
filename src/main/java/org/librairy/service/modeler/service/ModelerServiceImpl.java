@@ -13,6 +13,8 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Component
 public class ModelerServiceImpl implements ModelerService {
@@ -46,7 +48,11 @@ public class ModelerServiceImpl implements ModelerService {
             List<Double> shape = inferencePoolManager.get(Thread.currentThread()).inference(text);
             if (!topics) return Inference.newBuilder().setVector(shape).build();
 
-            return Inference.newBuilder().setVector(shape).setTopics(getTopics()).build();
+            List<TopicWord> topTopics = IntStream.range(0, shape.size()).mapToObj(i -> TopicWord.newBuilder().setScore(shape.get(i)).setValue("" + i).build()).filter(w -> w.getScore() > (1.0 / Double.valueOf(shape.size()))).sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList());
+
+            List<TopicSummary> topicList = getTopics();
+
+            return Inference.newBuilder().setVector(shape).setTopics(topTopics.stream().map(w -> topicList.get(Integer.valueOf(w.getValue()))).collect(Collectors.toList())).build();
         } catch (Exception e) {
             throw new AvroRemoteException("Error loading topic model",e);
         }
