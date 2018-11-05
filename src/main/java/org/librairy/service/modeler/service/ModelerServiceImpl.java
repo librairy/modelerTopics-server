@@ -2,6 +2,7 @@ package org.librairy.service.modeler.service;
 
 import io.swagger.models.auth.In;
 import org.apache.avro.AvroRemoteException;
+import org.librairy.service.modeler.builders.TopicSummaryBuilder;
 import org.librairy.service.modeler.facade.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +49,15 @@ public class ModelerServiceImpl implements ModelerService {
             List<Double> shape = inferencePoolManager.get(Thread.currentThread()).inference(text);
             if (!topics) return Inference.newBuilder().setVector(shape).build();
 
-            List<TopicWord> topTopics = IntStream.range(0, shape.size()).mapToObj(i -> TopicWord.newBuilder().setScore(shape.get(i)).setValue("" + i).build()).filter(w -> w.getScore() > (1.0 / Double.valueOf(shape.size()))).sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList());
+            TopicSummaryBuilder tsBuilder = new TopicSummaryBuilder(shape);
+
+
+//            List<TopicWord> topTopics = IntStream.range(0, shape.size()).mapToObj(i -> TopicWord.newBuilder().setScore(shape.get(i)).setValue("" + i).build()).filter(w -> w.getScore() > (1.0 / Double.valueOf(shape.size()))).sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList());
 
             List<TopicSummary> topicList = getTopics();
+            List<TopicSummary> topTopics = tsBuilder.getTopTopics().stream().map(i -> topicList.get(i)).collect(Collectors.toList());
 
-            return Inference.newBuilder().setVector(shape).setTopics(topTopics.stream().map(w -> topicList.get(Integer.valueOf(w.getValue()))).collect(Collectors.toList())).build();
+            return Inference.newBuilder().setVector(shape).setTopics(topTopics).build();
         } catch (Exception e) {
             throw new AvroRemoteException("Error loading topic model",e);
         }
