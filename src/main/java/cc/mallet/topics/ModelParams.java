@@ -220,8 +220,8 @@ public class ModelParams implements Serializable{
     @Override
     public String toString() {
         return "ModelParams{" +
-                "alpha=" + alpha +
-                ", beta=" + beta +
+                "alpha=" + getAlpha() +
+                ", beta=" + getBeta() +
                 ", numTopics=" + numTopics +
                 ", numTopWords=" + numTopWords +
                 ", numIterations=" + numIterations +
