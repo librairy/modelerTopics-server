@@ -128,6 +128,7 @@ public class ModelLauncher {
             params.put("min-freq",String.valueOf(parameters.getMinFreq()));
             params.put("max-doc-ratio",String.valueOf(parameters.getMaxDocRatio()));
             params.put("stop-words",parameters.getStopwords().toString());
+            params.put("entities",parameters.getEntities().toString());
 
 
             LOG.info("saving model stats..");
@@ -168,7 +169,7 @@ public class ModelLauncher {
             saveToFile(topics, Paths.get(baseDir, "model-topics.csv.gz"));
 
 
-            LOG.info("saving topics statistics..");
+            LOG.info("saving model parameters..");
             saveParameters(baseDir, parameters);
 
             LOG.info("saving model inferencer..");
