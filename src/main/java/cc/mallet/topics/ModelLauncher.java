@@ -130,9 +130,9 @@ public class ModelLauncher {
             params.put("stop-words",parameters.getStopwords().toString());
             params.put("entities",parameters.getEntities().toString());
 
-
             LOG.info("saving model stats..");
             TopicModelDiagnostics diagnostics = new TopicModelDiagnostics(model, numTopWords<0?50:numTopWords);
+
 
             Map<String,String> stats = new HashMap<>();
             stats.put("loglikelihood", String.valueOf(model.modelLogLikelihood()));
