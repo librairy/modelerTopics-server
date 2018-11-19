@@ -1,6 +1,8 @@
 package org.librairy.service.modeler.service;
 
+import cc.mallet.pipe.Pipe;
 import cc.mallet.topics.ModelLauncher;
+import cc.mallet.types.Alphabet;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -70,6 +72,11 @@ public class InferencePoolManager {
                             }
                 });
 
+    }
+
+    public void update(Alphabet alphabet, Pipe pipe) throws Exception {
+        this.inferencer = new Inferencer(ldaLauncher,client,topicsService.getParameters(),resourceFolder, alphabet, pipe);
+        inferenceCache.cleanUp();
     }
 
     public Inferencer get(Thread thread) throws Exception {
