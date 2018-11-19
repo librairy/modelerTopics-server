@@ -138,7 +138,7 @@ public class ModelLauncher {
             stats.put("loglikelihood", String.valueOf(model.modelLogLikelihood()));
             stats.put("vocabulary", String.valueOf(model.alphabet.size()));
             stats.put("corpus", String.valueOf(model.getData().size()));
-            stats.put("model-stop-words", model.stoplist.size() > 1000? model.stoplist.subList(0,1000).toString() : model.stoplist.toString());
+            stats.put("model-stop-words", model.stoplist.size() > 100? model.stoplist.subList(0,100).toString() : model.stoplist.toString());
             stats.put("topic-coherence", StatsService.from(diagnostics.getCoherence().scores));
             stats.put("topic-distance", StatsService.from(diagnostics.getDistanceFromCorpus().scores));
             stats.put("alpha-sum", String.valueOf(model.alphaSum));
