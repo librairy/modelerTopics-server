@@ -13,6 +13,8 @@ public class ModelParams implements Serializable{
 
     Double beta             = 0.0;
 
+    Integer seed            = -1;
+
     Integer numTopics       = 10;
 
     Integer numTopWords     = 50;
@@ -57,6 +59,14 @@ public class ModelParams implements Serializable{
     public ModelParams() {
     }
 
+    public Integer getSeed() {
+        return seed;
+    }
+
+    public void setSeed(Integer seed) {
+        this.seed = seed;
+    }
+
     public String getLanguage() {
         return language;
     }
@@ -66,7 +76,7 @@ public class ModelParams implements Serializable{
     }
 
     public Double getAlpha() {
-        return alpha == 0.0? (numTopics > 50? 50.0 / numTopics : 0.1) : 0.1;
+        return alpha == 0.0? (numTopics > 50? 50.0 / numTopics : 0.1) : alpha;
     }
 
     public void setAlpha(Double alpha) {
@@ -74,7 +84,7 @@ public class ModelParams implements Serializable{
     }
 
     public Double getBeta() {
-        return beta == 0.0? 0.1 : beta;
+        return beta == 0.0? 0.01 : beta;
     }
 
     public void setBeta(Double beta) {
@@ -239,7 +249,8 @@ public class ModelParams implements Serializable{
                 ", entities=" + entities +
                 ", stopwords=" + stopwords +
                 ", raw=" + raw +
-                ", raw=" + inference +
+                ", inference=" + inference +
+                ", seed=" + seed+
                 '}';
     }
 }
