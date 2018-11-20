@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -75,7 +76,7 @@ public class Inferencer {
         if (Strings.isNullOrEmpty(text)) return Collections.emptyList();
 
 
-        List<Group> bows = client.bow(text, this.language, this.posList, this.multigrams);
+        List<Group> bows = client.bow(text.replaceAll("\\P{Print}", ""), this.language, Collections.emptyList(), this.multigrams);
 
         String data = BoWService.toText(bows);
         String name = "";
@@ -100,15 +101,19 @@ public class Inferencer {
             featureData.add(feature);
         }
 
+
+        Instance dInstance = new Instance(featureData, target, name, source);
+
+        return inference(dInstance);
+    }
+
+    public List<Double> inference(Instance instance) throws Exception {
         int thinning = 1;//1
         int burnIn = 5;//5
-        double[] topicDistribution = topicInferer.getSampledDistribution(new Instance(featureData, target, name, source), iterations, thinning, burnIn);
 
-        String description = text.length() < 10 ? text : text.substring(0,10);
+        double[] shape = topicInferer.getSampledDistribution(instance, 10, thinning, burnIn);
 
-        LOG.debug("Topic Distribution of: " + description + ".. " + Arrays.toString(topicDistribution));
-        return Doubles.asList(topicDistribution);
-
+        return Doubles.asList(shape);
     }
 
     public TopicInferencer getTopicInferer() {
