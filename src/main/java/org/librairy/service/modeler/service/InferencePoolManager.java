@@ -75,8 +75,9 @@ public class InferencePoolManager {
     }
 
     public void update(Alphabet alphabet, Pipe pipe) throws Exception {
+        alphabet.stopGrowth();
         this.inferencer = new Inferencer(ldaLauncher,client,topicsService.getParameters(),resourceFolder, alphabet, pipe);
-        inferenceCache.cleanUp();
+        inferenceCache.invalidateAll();
     }
 
     public Inferencer get(Thread thread) throws Exception {
