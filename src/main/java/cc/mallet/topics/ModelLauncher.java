@@ -12,6 +12,7 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.librairy.service.modeler.facade.model.*;
+import org.librairy.service.modeler.service.InferencePoolManager;
 import org.librairy.service.modeler.service.StatsService;
 import org.librairy.service.modeler.service.TimeService;
 import org.librairy.service.modeler.service.TopicsService;
@@ -23,10 +24,7 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -49,6 +47,9 @@ public class ModelLauncher {
 
     @Autowired
     TopicsService topicsService;
+
+    @Autowired
+    InferencePoolManager inferencePoolManager;
 
     public boolean existsModel(String baseDir){
         return Paths.get(baseDir,"model-inferencer.bin").toFile().exists();
@@ -129,6 +130,7 @@ public class ModelLauncher {
             params.put("max-doc-ratio",String.valueOf(parameters.getMaxDocRatio()));
             params.put("stop-words",parameters.getStopwords().toString());
             params.put("entities",parameters.getEntities().toString());
+            params.put("seed",parameters.getSeed().toString());
 
             LOG.info("saving model stats..");
             TopicModelDiagnostics diagnostics = new TopicModelDiagnostics(model, numTopWords<0?50:numTopWords);
@@ -143,6 +145,7 @@ public class ModelLauncher {
             stats.put("topic-distance", StatsService.from(diagnostics.getDistanceFromCorpus().scores));
             stats.put("alpha-sum", String.valueOf(model.alphaSum));
             stats.put("beta-sum", String.valueOf(model.betaSum));
+            stats.put("alpha-topics", Arrays.asList(model.alpha).stream().map(d -> String.valueOf(d)).collect(Collectors.joining(", ")));
 
             Settings modelDetails = Settings.newBuilder().setAlgorithm(algorithm).setDate(TimeService.now()).setParams(params).setStats(stats).build();
             DataFileWriter<Settings> dataFileWriter = new DataFileWriter<Settings>(modelDatumWriter);
@@ -174,12 +177,15 @@ public class ModelLauncher {
 
             LOG.info("saving model inferencer..");
             ObjectOutputStream e2 = new ObjectOutputStream(new FileOutputStream(Paths.get(baseDir, "model-inferencer.bin").toFile()));
-            e2.writeObject(model.getInferencer());
+            TopicInferencer inferencer = model.getInferencer();
+            inferencer.setRandomSeed(parameters.getSeed());
+            e2.writeObject(inferencer);
             e2.close();
 
             LOG.info("saving model alphabet..");
             ObjectOutputStream e3 = new ObjectOutputStream(new FileOutputStream(Paths.get(baseDir, "model-alphabet.bin").toFile()));
-            e3.writeObject(model.getAlphabet());
+            //e3.writeObject(model.getAlphabet());
+            e3.writeObject(pipe.getAlphabet());
             e3.close();
 
             LOG.info("saving model pipe..");
@@ -191,6 +197,8 @@ public class ModelLauncher {
             LOG.info("model saved successfully");
 
             topicsService.loadModel();
+
+            inferencePoolManager.update(pipe.getAlphabet(), pipe);
 
         } catch (Exception var6) {
             LOG.warn("Couldn\'t save model", var6);
