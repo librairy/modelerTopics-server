@@ -34,6 +34,9 @@ public class TopicsService {
     @Autowired
     ModelLauncher modelLauncher;
 
+    @Autowired
+    InferencePoolManager inferencePoolManager;
+
     private Settings settings;
     private Map<Integer,Topic> topics = new HashMap<>();
     private Map<Integer, List<TopicNeighbour>> topicNeighbours = new HashMap<>();
@@ -43,7 +46,10 @@ public class TopicsService {
 
     @PostConstruct
     public void setup() throws Exception {
-        if (modelLauncher.existsModel(resourceFolder)) loadModel();
+        if (modelLauncher.existsModel(resourceFolder)){
+            loadModel();
+            inferencePoolManager.initializeInferencer();
+        }
         else LOG.warn("No found model!");
     }
 

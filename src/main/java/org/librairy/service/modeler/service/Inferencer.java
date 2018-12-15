@@ -44,7 +44,9 @@ public class Inferencer {
 
     public Inferencer(ModelLauncher ldaLauncher, LibrairyNlpClient client, ModelParams params, String resourceFolder, Alphabet alphabet, Pipe pipe) throws Exception {
 
+        LOG.info("reading model-inferencer ..");
         this.topicInferer               = ldaLauncher.getTopicInferencer(resourceFolder);
+        LOG.info("model-inferencer read");
         this.client                     = client;
         this.language                   = params.getLanguage();
         this.pos                        = params.getPos();

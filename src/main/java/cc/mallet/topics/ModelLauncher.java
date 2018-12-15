@@ -208,16 +208,20 @@ public class ModelLauncher {
 
 
     public Alphabet readModelAlphabet(String baseDir) throws IOException, ClassNotFoundException {
+        LOG.info("reading model-alphabet..");
         ObjectInputStream e3 = new ObjectInputStream(new FileInputStream(Paths.get(baseDir, "model-alphabet.bin").toFile()));
         Alphabet alphabet = (Alphabet) e3.readObject();
         e3.close();
+        LOG.info("model-alphabet read!");
         return alphabet;
     }
 
     public Pipe readModelPipe(String baseDir) throws IOException, ClassNotFoundException {
+        LOG.info("reading model-pipe..");
         ObjectInputStream e3 = new ObjectInputStream(new FileInputStream(Paths.get(baseDir, "model-pipe.bin").toFile()));
         Pipe pipe = (Pipe) e3.readObject();
         e3.close();
+        LOG.info("model-pipe read");
         return pipe;
     }
 

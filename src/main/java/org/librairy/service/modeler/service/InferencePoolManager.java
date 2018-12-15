@@ -7,6 +7,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
+import org.librairy.service.modeler.executors.ParallelExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -55,11 +54,7 @@ public class InferencePoolManager {
     @PostConstruct
     public void setup() throws Exception {
 
-        if (topicsService.getParameters() != null){
-            LOG.info("Deserializing topic inferencer ..");
-            this.inferencer = new Inferencer(ldaLauncher,client,topicsService.getParameters(),resourceFolder, ldaLauncher.readModelAlphabet(resourceFolder), ldaLauncher.readModelPipe(resourceFolder));
-            LOG.info("done!");
-        }
+        initializeInferencer();
 
         inferenceCache = CacheBuilder.newBuilder()
                 .maximumSize(maxThreads)
@@ -72,6 +67,14 @@ public class InferencePoolManager {
                             }
                 });
 
+    }
+
+    public void initializeInferencer() throws Exception {
+        if (topicsService.getParameters() != null){
+            LOG.info("Deserializing topic inferencer ..");
+            this.inferencer = new Inferencer(ldaLauncher,client,topicsService.getParameters(),resourceFolder, ldaLauncher.readModelAlphabet(resourceFolder), ldaLauncher.readModelPipe(resourceFolder));
+            LOG.info("done!");
+        }
     }
 
     public void update(Alphabet alphabet, Pipe pipe) throws Exception {
