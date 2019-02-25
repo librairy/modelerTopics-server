@@ -77,7 +77,6 @@ public class Inferencer {
 
         if (Strings.isNullOrEmpty(text)) return Collections.emptyList();
 
-
         List<Group> bows = client.bow(text.replaceAll("\\P{Print}", ""), this.language, Collections.emptyList(), this.multigrams);
 
         String data = BoWService.toText(bows);
@@ -113,7 +112,7 @@ public class Inferencer {
         int thinning = 1;//1
         int burnIn = 5;//5
 
-        double[] shape = topicInferer.getSampledDistribution(instance, 10, thinning, burnIn);
+        double[] shape = topicInferer.getSampledDistribution(instance, 200, thinning, burnIn);
 
         return Doubles.asList(shape);
     }

@@ -55,12 +55,23 @@ public class ModelerServiceImpl implements ModelerService {
 //            List<TopicWord> topTopics = IntStream.range(0, shape.size()).mapToObj(i -> TopicWord.newBuilder().setScore(shape.get(i)).setValue("" + i).build()).filter(w -> w.getScore() > (1.0 / Double.valueOf(shape.size()))).sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList());
 
             List<TopicSummary> topicList = getTopics();
-            List<TopicSummary> topTopics = tsBuilder.getTopTopics().stream().map(i -> topicList.get(i)).collect(Collectors.toList());
+            List<TopicSummary> topTopics = tsBuilder.getTopTopics().stream().map(i -> {
+                Integer id = i.getId();
+                i.setId(Integer.valueOf(i.getDescription().replace("level","")));
+                i.setName(topicList.get(id).getName());
+                i.setDescription(topicList.get(id).getDescription());
+                return i;
+            }).collect(Collectors.toList());
 
             return Inference.newBuilder().setVector(shape).setTopics(topTopics).build();
         } catch (Exception e) {
             throw new AvroRemoteException("Error loading topic model",e);
         }
+    }
+
+    @Override
+    public List<TopicSummary> assignClasses(String s) throws AvroRemoteException {
+        return createInference(s,true).getTopics();
     }
 
     @Override

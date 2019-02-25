@@ -41,7 +41,9 @@ public class ModelParams implements Serializable{
 
     Integer idIndex         = 1;
 
-    String pos              = "VERB NOUN ADVERB ADJECTIVE";
+    Integer size            = 0;
+
+    String pos              = "VERB NOUN ADJECTIVE";
 
     Boolean entities        = false;
 
@@ -57,6 +59,14 @@ public class ModelParams implements Serializable{
     }
 
     public ModelParams() {
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 
     public Integer getSeed() {
@@ -251,6 +261,7 @@ public class ModelParams implements Serializable{
                 ", raw=" + raw +
                 ", inference=" + inference +
                 ", seed=" + seed+
+                ", size=" + size+
                 '}';
     }
 }

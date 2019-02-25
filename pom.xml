@@ -40,6 +40,7 @@
 	  <mallet.version>2.0.8.1</mallet.version>
 	  <mockito.version>1.9.5</mockito.version>
 	  <librairy.nlp.version>[1.0,)</librairy.nlp.version>
+	  <librairy.metrics.version>[2.0,)</librairy.metrics.version>
 	  <librairy.modeler.version>[1.0,)</librairy.modeler.version>
 	  <librairy.swagger.version>[0.3,)</librairy.swagger.version>
 	  <testutils.version>1.0.0</testutils.version>
@@ -60,6 +61,13 @@
 				  <groupId>org.librairy</groupId>
 				  <artifactId>modeler-service-facade</artifactId>
 				  <version>${librairy.modeler.version}</version>
+			  </dependency>
+
+			  <!-- librAIry Metrics Service -->
+			  <dependency>
+				  <groupId>org.librairy</groupId>
+				  <artifactId>metrics</artifactId>
+				  <version>${librairy.metrics.version}</version>
 			  </dependency>
 
 			  <!-- librAIry NLP Service -->
@@ -152,6 +160,12 @@
 					  <artifactId>servlet-api</artifactId>
 				  </exclusion>
 			  </exclusions>
+		  </dependency>
+
+		  <!-- librAIry Metrics Service -->
+		  <dependency>
+			  <groupId>org.librairy</groupId>
+			  <artifactId>metrics</artifactId>
 		  </dependency>
 
 		  <!-- librAIry NLP Service -->
@@ -356,10 +370,20 @@
 
 	  <repositories>
 
-		  <!-- librAIry NER Repository -->
+		  <!-- librAIry Modeler Repository -->
 		  <repository>
 			  <id>modeler-service</id>
 			  <url>https://raw.github.com/librairy/modeler-service-facade/mvn-repo/</url>
+			  <snapshots>
+				  <enabled>true</enabled>
+				  <updatePolicy>always</updatePolicy>
+			  </snapshots>
+		  </repository>
+
+		  <!-- librAIry Metrics Repository -->
+		  <repository>
+			  <id>metrics</id>
+			  <url>https://raw.github.com/librairy/metrics/mvn-repo/</url>
 			  <snapshots>
 				  <enabled>true</enabled>
 				  <updatePolicy>always</updatePolicy>
