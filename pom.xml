@@ -42,7 +42,6 @@
 	  <librairy.nlp.version>[1.0,)</librairy.nlp.version>
 	  <librairy.metrics.version>[2.0,)</librairy.metrics.version>
 	  <librairy.modeler.version>[1.0,)</librairy.modeler.version>
-	  <librairy.swagger.version>[0.3,)</librairy.swagger.version>
 	  <testutils.version>1.0.0</testutils.version>
 	  <unirest.version>1.4.9</unirest.version>
       </properties>
@@ -75,13 +74,6 @@
 				  <groupId>org.librairy</groupId>
 				  <artifactId>nlp-service-facade</artifactId>
 				  <version>${librairy.nlp.version}</version>
-			  </dependency>
-
-			  <!-- librAIry Swagger -->
-			  <dependency>
-				  <groupId>org.librairy</groupId>
-				  <artifactId>swagger</artifactId>
-				  <version>${librairy.swagger.version}</version>
 			  </dependency>
 
 			  <!-- Mail -->
@@ -172,12 +164,6 @@
 		  <dependency>
 			  <groupId>org.librairy</groupId>
 			  <artifactId>nlp-service-facade</artifactId>
-		  </dependency>
-
-		  <!-- librAIry Swagger -->
-		  <dependency>
-			  <groupId>org.librairy</groupId>
-			  <artifactId>swagger</artifactId>
 		  </dependency>
 
 		  <!-- Mail -->
@@ -384,17 +370,6 @@
 		  <repository>
 			  <id>metrics</id>
 			  <url>https://raw.github.com/librairy/metrics/mvn-repo/</url>
-			  <snapshots>
-				  <enabled>true</enabled>
-				  <updatePolicy>always</updatePolicy>
-			  </snapshots>
-		  </repository>
-
-
-		  <!-- librAIry Swagger Repository -->
-		  <repository>
-			  <id>swagger</id>
-			  <url>https://raw.github.com/librairy/swagger/mvn-repo/</url>
 			  <snapshots>
 				  <enabled>true</enabled>
 				  <updatePolicy>always</updatePolicy>
