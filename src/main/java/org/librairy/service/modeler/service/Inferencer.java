@@ -112,7 +112,7 @@ public class Inferencer {
         int thinning = 1;//1
         int burnIn = 5;//5
 
-        double[] shape = topicInferer.getSampledDistribution(instance, 200, thinning, burnIn);
+        double[] shape = topicInferer.getSampledDistribution(instance, 1000, thinning, burnIn);
 
         return Doubles.asList(shape);
     }
