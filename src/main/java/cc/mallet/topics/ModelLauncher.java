@@ -160,7 +160,9 @@ public class ModelLauncher {
             Map<Integer,Double> entropies = new HashMap<>();
 
             for(Integer topicId : topWords.keySet()){
-                entropies.put(topicId,StatsService.entropy(topWords.get(topicId).stream().map(el -> el.getScore()).collect(Collectors.toList())));
+                List<TopicWord> tw = topWords.get(topicId);
+                Double entropy = ((tw != null) && (!tw.isEmpty()))? StatsService.entropy(topWords.get(topicId).stream().map(el -> el.getScore()).collect(Collectors.toList())) : 0.0;
+                entropies.put(topicId,entropy);
             }
 
             // save topic words
