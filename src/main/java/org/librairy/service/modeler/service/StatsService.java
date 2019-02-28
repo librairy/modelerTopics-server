@@ -31,8 +31,8 @@ public class StatsService {
         stats.append("dev=").append(stdDev.evaluate(valuesArray)).append("|");
         stats.append("mode=").append(StatUtils.mode(valuesArray)[0]).append("|");
         stats.append("mean=").append(StatUtils.mean(valuesArray)).append("|");
-        stats.append("median=").append(StatUtils.geometricMean(valuesArray)).append("|");
-        stats.append("variance=").append(StatUtils.variance(valuesArray)).append("|");
+        stats.append("median=").append(StatUtils.percentile(valuesArray,50.0)).append("|");
+        stats.append("variance=").append(StatUtils.variance(valuesArray));
         return stats.toString();
     }
 

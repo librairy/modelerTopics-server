@@ -122,7 +122,7 @@ public class ModelLauncher {
             params.put("language",parameters.getLanguage());
             params.put("alpha",String.valueOf(parameters.getAlpha()));
             params.put("beta",String.valueOf(parameters.getBeta()));
-            params.put("topics",String.valueOf(parameters.getNumTopics()));
+            params.put("topics",String.valueOf(model.getNumTopics()));
             params.put("iterations",String.valueOf(parameters.getNumIterations()));
             params.put("optimization",String.valueOf(parameters.getNumRetries()));
             params.put("top-words",String.valueOf(parameters.getNumTopWords()));
