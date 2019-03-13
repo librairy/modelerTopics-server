@@ -166,7 +166,7 @@ public class LibrairyNlpClient {
     private String lemmatizeByAVRO(String text, String language, List<PoS> poSList, String key, Boolean entities){
         try {
             AvroClient client = clients.get(key);
-            return client.tokens(text,poSList, Form.LEMMA, entities);
+            return client.tokens(text,poSList, Form.LEMMA, entities, language);
         } catch (Exception e) {
             LOG.error("Error retrieving lemmas from nlp service: " + nlpEndpoint.replace("%%", language), e);
         }
@@ -174,15 +174,15 @@ public class LibrairyNlpClient {
     }
 
     private String lemmatizeByHttp(String text, String language, List<PoS> poSList, String key, Boolean multigrams){
-        String nlpServiceEndpoint = nlpEndpoint.replace("%%", language);
 
         try {
             TokensRequest request = new TokensRequest();
             request.setFilter(poSList);
             request.setForm(Form.LEMMA);
+            request.setLang(language);
             request.setText(text);
             request.setMultigrams(multigrams);
-            HttpResponse<JsonNode> response = Unirest.post(nlpServiceEndpoint + "/tokens").
+            HttpResponse<JsonNode> response = Unirest.post(nlpEndpoint + "/tokens").
                     body(request).
                     asJson();
             if (response.getStatus() == 200) {
@@ -208,7 +208,7 @@ public class LibrairyNlpClient {
     private List<Group> bowByAVRO(String text, String language, List<PoS> poSList, String key, Boolean multigrams){
         try {
             AvroClient client = clients.get(key);
-            return client.groups(text,poSList, Form.LEMMA, multigrams, false);
+            return client.groups(text,poSList, Form.LEMMA, multigrams, false, language);
         } catch (Exception e) {
             LOG.error("Error retrieving bow from nlp service: " + nlpEndpoint.replace("%%", language), e);
         }
@@ -216,7 +216,6 @@ public class LibrairyNlpClient {
     }
 
     private List<Group> bowByHttp(String text, String language, List<PoS> poSList, String key, Boolean multigrams){
-        String nlpServiceEndpoint = nlpEndpoint.replace("%%", language);
 
         List<Group> tokens = new ArrayList<>();
         try {
@@ -224,7 +223,8 @@ public class LibrairyNlpClient {
             request.setFilter(poSList);
             request.setText(text);
             request.setMultigrams(multigrams);
-            HttpResponse<JsonNode> response = Unirest.post(nlpServiceEndpoint + "/groups").
+            request.setLang(language);
+            HttpResponse<JsonNode> response = Unirest.post(nlpEndpoint + "/groups").
                     body(request).
                     asJson();
             if (response.getStatus() == 200){

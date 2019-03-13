@@ -51,6 +51,8 @@ public class ModelParams implements Serializable{
 
     List<String> stopwords  = new ArrayList<>();
 
+    List<String> stoplabels = new ArrayList<>();
+
     Boolean raw             = false;
 
     public ModelParams(String corpusFile, String outputDir) {
@@ -59,6 +61,14 @@ public class ModelParams implements Serializable{
     }
 
     public ModelParams() {
+    }
+
+    public List<String> getStoplabels() {
+        return stoplabels;
+    }
+
+    public void setStoplabels(List<String> stoplabels) {
+        this.stoplabels = stoplabels;
     }
 
     public Integer getSize() {
@@ -258,6 +268,7 @@ public class ModelParams implements Serializable{
                 ", pos='" + pos + '\'' +
                 ", entities=" + entities +
                 ", stopwords=" + stopwords +
+                ", stoplabels=" + stoplabels +
                 ", raw=" + raw +
                 ", inference=" + inference +
                 ", seed=" + seed+

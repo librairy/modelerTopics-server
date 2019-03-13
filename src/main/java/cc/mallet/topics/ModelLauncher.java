@@ -12,10 +12,7 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.librairy.service.modeler.facade.model.*;
-import org.librairy.service.modeler.service.InferencePoolManager;
-import org.librairy.service.modeler.service.StatsService;
-import org.librairy.service.modeler.service.TimeService;
-import org.librairy.service.modeler.service.TopicsService;
+import org.librairy.service.modeler.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,27 +129,6 @@ public class ModelLauncher {
             params.put("entities",parameters.getEntities().toString());
             params.put("seed",parameters.getSeed().toString());
 
-            LOG.info("saving model stats..");
-            TopicModelDiagnostics diagnostics = new TopicModelDiagnostics(model, numTopWords<0?50:numTopWords);
-
-
-            Map<String,String> stats = new HashMap<>();
-            stats.put("loglikelihood", String.valueOf(model.modelLogLikelihood()));
-            stats.put("vocabulary", String.valueOf(model.alphabet.size()));
-            stats.put("corpus", String.valueOf(model.getData().size()));
-            stats.put("model-stop-words", model.stoplist.size() > 100? model.stoplist.subList(0,100).toString() : model.stoplist.toString());
-            stats.put("topic-coherence", StatsService.from(diagnostics.getCoherence().scores));
-            stats.put("topic-distance", StatsService.from(diagnostics.getDistanceFromCorpus().scores));
-            stats.put("alpha-sum", String.valueOf(model.alphaSum));
-            stats.put("beta-sum", String.valueOf(model.betaSum));
-            stats.put("alpha-topics", Arrays.asList(model.alpha).stream().map(d -> String.valueOf(d)).collect(Collectors.joining(", ")));
-
-            Settings modelDetails = Settings.newBuilder().setAlgorithm(algorithm).setDate(TimeService.now()).setParams(params).setStats(stats).build();
-            DataFileWriter<Settings> dataFileWriter = new DataFileWriter<Settings>(modelDatumWriter);
-            dataFileWriter.create(modelDetails.getSchema(),Paths.get(baseDir,"model-settings.bin").toFile());
-            dataFileWriter.append(modelDetails);
-            dataFileWriter.close();
-
             LOG.info("saving model topics..");
             Map<Integer, List<TopicWord>> topWords = topicsService.getTopWords(model, numTopWords);
 
@@ -172,6 +148,29 @@ public class ModelLauncher {
             // save topics
             List<String> topics = IntStream.range(0, topWords.size()).parallel().mapToObj(i -> i + ";;" + model.getTopicAlphabet().lookupObject(i) + ";;" + topWords.get(i).stream().sorted( (a,b) -> -a.getScore().compareTo(b.getScore())).limit(10).map(w -> w.getValue().replace(";","")).collect(Collectors.joining(","))+ ";;" +  entropies.get(i) + "\n").collect(Collectors.toList());
             saveToFile(topics, Paths.get(baseDir, "model-topics.csv.gz"));
+
+
+            LOG.info("saving model stats..");
+
+            TopicModelDiagnostics diagnostics = new TopicModelDiagnostics(model, numTopWords < 0 ? 50 : numTopWords);
+
+
+            Map<String,String> stats = new HashMap<>();
+            stats.put("loglikelihood", String.valueOf(model.modelLogLikelihood()));
+            stats.put("vocabulary", String.valueOf(model.alphabet.size()));
+            stats.put("corpus", String.valueOf(model.getData().size()));
+            stats.put("model-stop-words", model.stoplist.size() > 100? model.stoplist.subList(0,100).toString() : model.stoplist.toString());
+            stats.put("topic-coherence", StatsService.from(diagnostics.getCoherence().scores));
+            stats.put("topic-distance", StatsService.from(diagnostics.getDistanceFromCorpus().scores));
+            stats.put("alpha-sum", String.valueOf(model.alphaSum));
+            stats.put("beta-sum", String.valueOf(model.betaSum));
+            stats.put("alpha-topics", Arrays.asList(model.alpha).stream().map(d -> String.valueOf(d)).collect(Collectors.joining(", ")));
+
+            Settings modelDetails = Settings.newBuilder().setAlgorithm(algorithm).setDate(TimeService.now()).setParams(params).setStats(stats).build();
+            DataFileWriter<Settings> dataFileWriter = new DataFileWriter<Settings>(modelDatumWriter);
+            dataFileWriter.create(modelDetails.getSchema(),Paths.get(baseDir,"model-settings.bin").toFile());
+            dataFileWriter.append(modelDetails);
+            dataFileWriter.close();
 
 
             LOG.info("saving model parameters..");
