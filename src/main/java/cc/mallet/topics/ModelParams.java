@@ -43,7 +43,7 @@ public class ModelParams implements Serializable{
 
     Integer size            = 0;
 
-    String pos              = "VERB NOUN ADJECTIVE";
+    String pos              = "VERB NOUN PROPER_NOUN ADJECTIVE";
 
     Boolean entities        = false;
 
