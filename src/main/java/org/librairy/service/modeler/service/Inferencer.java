@@ -41,6 +41,7 @@ public class Inferencer {
     private final Integer iterations;
     private final Pipe pipe;
     private final Alphabet alphabet;
+    private final Boolean lowercase;
 
     public Inferencer(ModelLauncher ldaLauncher, LibrairyNlpClient client, ModelParams params, String resourceFolder, Alphabet alphabet, Pipe pipe) throws Exception {
 
@@ -56,6 +57,7 @@ public class Inferencer {
         this.iterations                 = params.getNumIterations();
         this.pipe                       = pipe;
         this.alphabet                   = alphabet;
+        this.lowercase                  = params.getLowercase();
 
     }
 
@@ -70,6 +72,7 @@ public class Inferencer {
         this.iterations                 = params.getNumIterations();
         this.pipe                       = pipe;
         this.alphabet                   = alphabet;
+        this.lowercase                  = params.getLowercase();
     }
 
 
@@ -77,7 +80,9 @@ public class Inferencer {
 
         if (Strings.isNullOrEmpty(text)) return Collections.emptyList();
 
-        List<Group> bows = client.bow(text.replaceAll("\\P{Print}", ""), this.language, Collections.emptyList(), this.multigrams);
+        String txt = lowercase? text.toLowerCase() : text;
+
+        List<Group> bows = client.bow(txt.replaceAll("\\P{Print}", ""), this.language, Collections.emptyList(), this.multigrams);
 
         String data = BoWService.toText(bows);
         String name = "";

@@ -128,6 +128,7 @@ public class ModelLauncher {
             params.put("stop-words",parameters.getStopwords().toString());
             params.put("entities",parameters.getEntities().toString());
             params.put("seed",parameters.getSeed().toString());
+            params.put("lowercase",parameters.getLowercase().toString());
 
             LOG.info("saving model topics..");
             Map<Integer, List<TopicWord>> topWords = topicsService.getTopWords(model, numTopWords);

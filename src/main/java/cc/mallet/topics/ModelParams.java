@@ -31,6 +31,8 @@ public class ModelParams implements Serializable{
 
     String outputDir;
 
+    Boolean lowercase       = false;
+
     String language         = "en";
 
     String regEx            = "(.*);;(.*);;(.*);;(.*)";
@@ -133,6 +135,14 @@ public class ModelParams implements Serializable{
 
     public void setNumIterations(Integer numIterations) {
         this.numIterations = numIterations;
+    }
+
+    public Boolean getLowercase() {
+        return lowercase;
+    }
+
+    public void setLowercase(Boolean lowercase) {
+        this.lowercase = lowercase;
     }
 
     public String getCorpusFile() {
@@ -273,6 +283,7 @@ public class ModelParams implements Serializable{
                 ", inference=" + inference +
                 ", seed=" + seed+
                 ", size=" + size+
+                ", lowercase=" + lowercase+
                 '}';
     }
 }
