@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.librairy" level="DEBUG"/>
+    <logger name="es.upm.oeg.librairy" level="DEBUG"/>
     <logger name="cc.mallet.topics" level="DEBUG"/>
 
     <root level="ERROR">
