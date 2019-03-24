@@ -31,6 +31,10 @@ public class ModelParams implements Serializable{
 
     String outputDir;
 
+    Boolean autolabels      = true;
+
+    Boolean autowords       = true;
+
     Boolean lowercase       = false;
 
     String language         = "en";
@@ -63,6 +67,22 @@ public class ModelParams implements Serializable{
     }
 
     public ModelParams() {
+    }
+
+    public Boolean getAutolabels() {
+        return autolabels;
+    }
+
+    public void setAutolabels(Boolean autolabels) {
+        this.autolabels = autolabels;
+    }
+
+    public Boolean getAutowords() {
+        return autowords;
+    }
+
+    public void setAutowords(Boolean autowords) {
+        this.autowords = autowords;
     }
 
     public List<String> getStoplabels() {
@@ -284,6 +304,8 @@ public class ModelParams implements Serializable{
                 ", seed=" + seed+
                 ", size=" + size+
                 ", lowercase=" + lowercase+
+                ", autolabels=" + autolabels+
+                ", autowords=" + autowords+
                 '}';
     }
 }
