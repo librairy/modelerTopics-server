@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Component
@@ -30,6 +32,8 @@ public class ModelerServiceImpl implements ModelerService {
     @Autowired
     InferencePoolManager inferencePoolManager;
 
+    private Map<Integer,TopicSummary> topicMap;
+
     @PostConstruct
     public void setup() throws IOException {
 
@@ -37,12 +41,18 @@ public class ModelerServiceImpl implements ModelerService {
         //model              = Paths.get(resourceFolder,"resource.bin").toFile().getAbsolutePath();
 
         LOG.info("Service initialized");
+
+        topicMap = new ConcurrentHashMap<>();
+        List<TopicSummary> topics = getTopics();
+        for(int i=0;i<topics.size();i++){
+            topicMap.put(i,topics.get(i));
+        }
     }
 
     @Override
     public Inference createInference(String text, boolean topics) throws AvroRemoteException {
         try {
-
+            LOG.info("Creating inference from text..");
             List<Double> shape = inferencePoolManager.get(Thread.currentThread()).inference(text);
             if (!topics) return Inference.newBuilder().setVector(shape).build();
 
@@ -51,12 +61,13 @@ public class ModelerServiceImpl implements ModelerService {
 
 //            List<TopicWord> topTopics = IntStream.range(0, shape.size()).mapToObj(i -> TopicWord.newBuilder().setScore(shape.get(i)).setValue("" + i).build()).filter(w -> w.getScore() > (1.0 / Double.valueOf(shape.size()))).sorted((a, b) -> -a.getScore().compareTo(b.getScore())).collect(Collectors.toList());
 
-            List<TopicSummary> topicList = getTopics();
             List<TopicSummary> topTopics = tsBuilder.getTopTopics().stream().map(i -> {
                 Integer id = i.getId();
                 i.setId(Integer.valueOf(i.getDescription().replace("level","")));
-                i.setName(topicList.get(id).getName());
-                i.setDescription(topicList.get(id).getDescription());
+
+                TopicSummary ts = topicMap.get(id);
+                i.setName(ts.getName());
+                i.setDescription(ts.getDescription());
                 return i;
             }).collect(Collectors.toList());
 

@@ -127,7 +127,7 @@ public class ModelLauncher {
             params.put("top-words",String.valueOf(parameters.getNumTopWords()));
             params.put("min-freq",String.valueOf(parameters.getMinFreq()));
             params.put("max-doc-ratio",String.valueOf(parameters.getMaxDocRatio()));
-            params.put("stop-words",parameters.getStopwords().toString());
+            params.put("stop-words",parameters.getStopwords().stream().filter(w -> !Strings.isNullOrEmpty(w)).toString());
             params.put("entities",parameters.getEntities().toString());
             params.put("seed",parameters.getSeed().toString());
             params.put("lowercase",parameters.getLowercase().toString());
@@ -169,7 +169,7 @@ public class ModelLauncher {
             stats.put("topic-distance", StatsService.from(diagnostics.getDistanceFromCorpus().scores));
             stats.put("alpha-sum", String.valueOf(model.alphaSum));
             stats.put("beta-sum", String.valueOf(model.betaSum));
-            stats.put("alpha-topics", Arrays.asList(model.alpha).stream().map(d -> String.valueOf(d)).collect(Collectors.joining(", ")));
+//            stats.put("alpha-topics", Arrays.asList(model.alpha).stream().map(d -> String.valueOf(d)).collect(Collectors.joining(", ")));
 
             Settings modelDetails = Settings.newBuilder().setAlgorithm(algorithm).setDate(TimeService.now()).setParams(params).setStats(stats).build();
             DataFileWriter<Settings> dataFileWriter = new DataFileWriter<Settings>(modelDatumWriter);
