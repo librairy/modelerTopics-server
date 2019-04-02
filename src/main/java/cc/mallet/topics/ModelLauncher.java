@@ -127,7 +127,7 @@ public class ModelLauncher {
             params.put("top-words",String.valueOf(parameters.getNumTopWords()));
             params.put("min-freq",String.valueOf(parameters.getMinFreq()));
             params.put("max-doc-ratio",String.valueOf(parameters.getMaxDocRatio()));
-            params.put("stop-words",parameters.getStopwords().stream().filter(w -> !Strings.isNullOrEmpty(w)).toString());
+            params.put("stop-words",parameters.getStopwords().stream().filter(w -> !Strings.isNullOrEmpty(w)).collect(Collectors.toList()).toString());
             params.put("entities",parameters.getEntities().toString());
             params.put("seed",parameters.getSeed().toString());
             params.put("lowercase",parameters.getLowercase().toString());
@@ -164,7 +164,7 @@ public class ModelLauncher {
             stats.put("loglikelihood", String.valueOf(model.modelLogLikelihood()));
             stats.put("vocabulary", String.valueOf(model.alphabet.size()));
             stats.put("corpus", String.valueOf(model.getData().size()));
-            stats.put("model-stop-words", model.stoplist.size() > 100? model.stoplist.subList(0,100).toString() : model.stoplist.toString());
+            if ( !model.stoplist.isEmpty()) stats.put("model-stop-words", model.stoplist.size() > 100? model.stoplist.subList(0,100).toString() : model.stoplist.toString());
             stats.put("topic-coherence", StatsService.from(diagnostics.getCoherence().scores));
             stats.put("topic-distance", StatsService.from(diagnostics.getDistanceFromCorpus().scores));
             stats.put("alpha-sum", String.valueOf(model.alphaSum));
