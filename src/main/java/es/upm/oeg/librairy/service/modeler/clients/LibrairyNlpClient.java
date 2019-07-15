@@ -208,7 +208,7 @@ public class LibrairyNlpClient {
     private List<Group> bowByAVRO(String text, String language, List<PoS> poSList, String key, Boolean multigrams){
         try {
             AvroClient client = clients.get(key);
-            return client.groups(text,poSList, Form.LEMMA, multigrams, false, language);
+            return client.groups(text,poSList, Form.LEMMA, multigrams, false, false, language);
         } catch (Exception e) {
             LOG.error("Error retrieving bow from nlp service: " + nlpEndpoint.replace("%%", language), e);
         }

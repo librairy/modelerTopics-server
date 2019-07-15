@@ -4,7 +4,7 @@
  
   <groupId>org.librairy</groupId>
   <artifactId>modeler-topics-service</artifactId>
-  <version>1.2</version>
+  <version>1.3</version>
   <packaging>jar</packaging>
   <name>modeler-topics-service</name>
   
