@@ -50,7 +50,6 @@ public class TopicsService {
             loadModel();
             inferencePoolManager.initializeInferencer();
         }
-        else LOG.warn("No found model!");
     }
 
     @PreDestroy
