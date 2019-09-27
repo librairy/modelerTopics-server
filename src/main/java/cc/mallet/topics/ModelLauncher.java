@@ -83,7 +83,7 @@ public class ModelLauncher {
 
     }
 
-    public void saveModel(String baseDir, String algorithm, ModelParams parameters, ParallelTopicModel model, Integer numTopWords, Pipe pipe) throws IOException {
+    public Double saveModel(String baseDir, String algorithm, ModelParams parameters, ParallelTopicModel model, Integer numTopWords, Pipe pipe) throws IOException {
         try {
             File modelFolder = new File(baseDir);
             if (!modelFolder.exists()) modelFolder.mkdirs();
@@ -161,7 +161,8 @@ public class ModelLauncher {
 
 
             Map<String,String> stats = new HashMap<>();
-            stats.put("loglikelihood", String.valueOf(model.modelLogLikelihood()));
+            double loglikelihood = model.modelLogLikelihood();
+            stats.put("loglikelihood", String.valueOf(loglikelihood));
             stats.put("vocabulary", String.valueOf(model.alphabet.size()));
             stats.put("corpus", String.valueOf(model.getData().size()));
             if ( !model.stoplist.isEmpty()) stats.put("model-stop-words", model.stoplist.size() > 100? model.stoplist.subList(0,100).toString() : model.stoplist.toString());
@@ -206,8 +207,11 @@ public class ModelLauncher {
 
             inferencePoolManager.update(pipe.getAlphabet(), pipe);
 
+            return loglikelihood;
+
         } catch (Exception var6) {
             LOG.warn("Couldn\'t save model", var6);
+            return -100.0;
         }
 
     }
