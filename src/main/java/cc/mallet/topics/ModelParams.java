@@ -23,9 +23,9 @@ public class ModelParams implements Serializable{
 
     Integer numRetries      = 0;
 
-    Integer minFreq         = 1;
+    Integer minFreq         = 2;
 
-    Double  maxDocRatio     = 0.5;
+    Double  maxDocRatio     = 0.75;
 
     String corpusFile;
 
@@ -49,7 +49,7 @@ public class ModelParams implements Serializable{
 
     Integer size            = 0;
 
-    String pos              = "VERB NOUN PROPER_NOUN ADJECTIVE";
+    String pos              = "VERB NOUN ADJECTIVE";
 
     Boolean entities        = false;
 
