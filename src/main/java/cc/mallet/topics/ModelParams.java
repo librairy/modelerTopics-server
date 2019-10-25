@@ -25,7 +25,7 @@ public class ModelParams implements Serializable{
 
     Integer minFreq         = 1;
 
-    Double  maxDocRatio     = 1.0;
+    Double  maxDocRatio     = 0.5;
 
     String corpusFile;
 
@@ -35,7 +35,7 @@ public class ModelParams implements Serializable{
 
     Boolean autowords       = false;
 
-    Boolean lowercase       = false;
+    Boolean lowercase       = true;
 
     String language         = "en";
 
