@@ -9,9 +9,9 @@ import java.util.List;
  */
 public class ModelParams implements Serializable{
 
-    Double alpha            = 0.0;
+    Double alpha            = 0.1;
 
-    Double beta             = 0.0;
+    Double beta             = 0.01;
 
     Integer seed            = -1;
 
@@ -21,9 +21,9 @@ public class ModelParams implements Serializable{
 
     Integer numIterations   = 1000;
 
-    Integer numRetries      = 10;
+    Integer numRetries      = 0;
 
-    Integer minFreq         = 0;
+    Integer minFreq         = 1;
 
     Double  maxDocRatio     = 1.0;
 
@@ -31,9 +31,9 @@ public class ModelParams implements Serializable{
 
     String outputDir;
 
-    Boolean autolabels      = true;
+    Boolean autolabels      = false;
 
-    Boolean autowords       = true;
+    Boolean autowords       = false;
 
     Boolean lowercase       = false;
 
