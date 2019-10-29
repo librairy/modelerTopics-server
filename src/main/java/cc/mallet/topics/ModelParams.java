@@ -13,7 +13,7 @@ public class ModelParams implements Serializable{
 
     Double beta             = 0.01;
 
-    Integer seed            = -1;
+    Integer seed            = 1066;//-1
 
     Integer numTopics       = 10;
 
