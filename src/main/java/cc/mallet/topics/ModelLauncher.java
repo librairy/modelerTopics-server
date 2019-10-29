@@ -88,7 +88,6 @@ public class ModelLauncher {
             File modelFolder = new File(baseDir);
             if (!modelFolder.exists()) modelFolder.mkdirs();
 
-
             LOG.info("saving doctopics .. ");
             File docTopicsFile = Paths.get(baseDir, "doctopics.csv.gz").toFile();
             if (docTopicsFile.exists()) docTopicsFile.delete();

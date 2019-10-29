@@ -35,7 +35,7 @@ public class ModelParams implements Serializable{
 
     Boolean autowords       = false;
 
-    Boolean lowercase       = true;
+    Boolean lowercase       = false;
 
     String language         = "en";
 
