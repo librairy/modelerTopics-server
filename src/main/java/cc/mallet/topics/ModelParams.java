@@ -17,7 +17,7 @@ public class ModelParams implements Serializable{
 
     Integer numTopics       = 10;
 
-    Integer numTopWords     = 50;
+    Integer numTopWords     = 20;
 
     Integer numIterations   = 1000;
 
