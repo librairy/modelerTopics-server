@@ -35,4 +35,11 @@ public class BoWService {
         return groups.stream().filter(token -> !token.getToken().contains(" ")).map(token -> escaper.escape(token.getToken()) + "=" + token.getFreq() + "#" + token.getPos() + "#").collect(Collectors.joining(" "));
     }
 
+    public static String toText(String bow){
+
+        if (bow.isEmpty()) return "";
+
+        return bow;
+    }
+
 }
