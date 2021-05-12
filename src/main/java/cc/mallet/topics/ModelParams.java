@@ -61,6 +61,8 @@ public class ModelParams implements Serializable{
 
     Boolean raw             = false;
 
+    Boolean bow             = false;
+
     public ModelParams(String corpusFile, String outputDir) {
         this.corpusFile = corpusFile;
         this.outputDir = outputDir;
@@ -267,6 +269,14 @@ public class ModelParams implements Serializable{
 
     public void setRaw(Boolean raw) {
         this.raw = raw;
+    }
+
+    public Boolean getBow() {
+        return bow;
+    }
+
+    public void setBow(Boolean bow) {
+        this.bow = bow;
     }
 
     public Boolean getInference() {
